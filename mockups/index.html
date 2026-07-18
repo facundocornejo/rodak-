@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rodak — Diseñá tu setup (mockup)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* base cálida tintada hacia el ámbar — no blanco puro */
+  --paper: oklch(0.975 0.008 80);
+  --paper-2: oklch(0.955 0.012 80);
+  --ink: oklch(0.22 0.012 70);        /* carbón cálido = tinta */
+  --ink-soft: oklch(0.42 0.012 70);
+  --ink-faint: oklch(0.60 0.010 70);
+  --line: oklch(0.88 0.010 80);
+  --gold: oklch(0.74 0.132 74);        /* acento Rodak */
+  --gold-deep: oklch(0.60 0.118 66);
+  --sale: oklch(0.55 0.15 28);         /* rojo cálido para descuentos */
+
+  --space-xs:4px; --space-sm:8px; --space-md:12px; --space-lg:16px;
+  --space-xl:24px; --space-2xl:32px; --space-3xl:48px; --space-4xl:64px;
+  --space-5xl:96px; --space-6xl:140px;
+
+  --wrap: 1240px;
+  --step--1: clamp(0.82rem, 0.8rem + 0.1vw, 0.9rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.08rem);
+  --step-1: clamp(1.3rem, 1.2rem + 0.5vw, 1.6rem);
+  --step-2: clamp(1.8rem, 1.5rem + 1.4vw, 2.7rem);
+  --step-3: clamp(2.6rem, 1.9rem + 3.4vw, 5rem);
+  --step-4: clamp(3.4rem, 2rem + 6.6vw, 8rem);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:"Hanken Grotesk",system-ui,sans-serif;
+  font-size:var(--step-0);line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+h1,h2,h3,.display{font-family:"Bricolage Grotesque",serif;line-height:1;letter-spacing:-0.02em;font-weight:700}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--wrap);margin-inline:auto;padding-inline:var(--space-xl)}
+.eyebrow{font-size:var(--step--1);letter-spacing:0.18em;text-transform:uppercase;font-weight:600;color:var(--ink-faint)}
+
+/* ---------- announcement + nav ---------- */
+.announce{background:var(--ink);color:var(--paper);text-align:center;font-size:var(--step--1);
+  letter-spacing:0.08em;padding:var(--space-sm) var(--space-lg);font-weight:500}
+.announce b{color:var(--gold);font-weight:700}
+header{position:sticky;top:0;z-index:50;background:color-mix(in oklch,var(--paper) 88%,transparent);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:76px}
+.nav-left,.nav-right{display:flex;gap:var(--space-xl);align-items:center}
+.nav-right{justify-content:flex-end}
+.nav a.link{font-size:var(--step--1);letter-spacing:0.04em;font-weight:600;color:var(--ink-soft);
+  transition:color .25s}
+.nav a.link:hover{color:var(--ink)}
+.wordmark{font-family:"Bricolage Grotesque";font-weight:800;font-size:1.7rem;letter-spacing:-0.03em;
+  text-align:center;color:var(--ink)}
+.wordmark span{color:var(--gold)}
+.icn{width:20px;height:20px;stroke:var(--ink);stroke-width:1.6;fill:none}
+.cartpill{display:flex;align-items:center;gap:var(--space-sm);border:1px solid var(--line);
+  border-radius:999px;padding:6px var(--space-md);font-size:var(--step--1);font-weight:600}
+.cartpill .dot{background:var(--gold);color:var(--ink);border-radius:999px;width:18px;height:18px;
+  display:grid;place-items:center;font-size:0.68rem;font-weight:800}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:88vh;display:flex;align-items:flex-end;
+  background:linear-gradient(180deg,oklch(0.28 0.02 70) 0%,oklch(0.20 0.015 70) 100%);
+  overflow:hidden}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;
+  opacity:0.72}
+.hero::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 30%,oklch(0.15 0.015 70 / .82) 100%)}
+.hero-inner{position:relative;z-index:2;color:var(--paper);padding-block:var(--space-5xl) var(--space-4xl);
+  max-width:900px}
+.hero h1{font-size:var(--step-4);color:var(--paper);font-weight:800;letter-spacing:-0.03em}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p{font-size:var(--step-1);max-width:34ch;margin-top:var(--space-xl);color:oklch(0.92 0.01 80);
+  font-weight:400;line-height:1.4}
+.hero .cta-row{display:flex;gap:var(--space-md);margin-top:var(--space-2xl);flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:var(--space-sm);font-family:"Hanken Grotesk";
+  font-weight:700;font-size:var(--step-0);padding:var(--space-md) var(--space-xl);border-radius:999px;
+  border:1px solid transparent;cursor:pointer;transition:transform .2s,background .25s,color .25s}
+.btn:hover{transform:translateY(-2px)}
+.btn-gold{background:var(--gold);color:var(--ink)}
+.btn-gold:hover{background:oklch(0.79 0.135 76)}
+.btn-ghost-light{border-color:oklch(0.92 0 0 / .4);color:var(--paper)}
+.btn-ghost-light:hover{background:oklch(1 0 0 / .1)}
+.btn-dark{background:var(--ink);color:var(--paper)}
+.btn-dark:hover{background:oklch(0.30 0.012 70)}
+.btn-ghost{border-color:var(--line);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--ink)}
+
+/* ---------- marquee trust strip ---------- */
+.strip{background:var(--ink);color:var(--paper);padding:var(--space-lg) 0;overflow:hidden}
+.strip-track{display:flex;gap:var(--space-4xl);white-space:nowrap;animation:marq 28s linear infinite;
+  font-size:var(--step--1);letter-spacing:0.14em;text-transform:uppercase;font-weight:600;
+  color:oklch(0.82 0.01 80)}
+.strip-track span b{color:var(--gold)}
+@keyframes marq{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.strip-track{animation:none}}
+
+/* ---------- section shells ---------- */
+section{padding-block:var(--space-6xl)}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:var(--space-xl);
+  margin-bottom:var(--space-3xl);flex-wrap:wrap}
+.sec-head h2{font-size:var(--step-2)}
+.sec-head p{color:var(--ink-soft);max-width:44ch;margin-top:var(--space-sm)}
+
+/* ---------- the system (modular explainer) ---------- */
+.system{background:var(--paper-2)}
+.system-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:var(--space-4xl);align-items:center}
+.system-visual{position:relative;aspect-ratio:4/3;border-radius:20px;overflow:hidden;background:var(--ink)}
+.system-visual img{width:100%;height:100%;object-fit:cover}
+.system-visual .pin{position:absolute;background:var(--paper);color:var(--ink);border-radius:999px;
+  padding:6px var(--space-md);font-size:var(--step--1);font-weight:700;box-shadow:0 8px 24px oklch(0 0 0 /.25);
+  display:flex;align-items:center;gap:6px}
+.system-visual .pin::before{content:"";width:7px;height:7px;border-radius:999px;background:var(--gold)}
+.pin.p1{top:16%;left:8%}.pin.p2{top:54%;left:20%}.pin.p3{top:34%;right:10%}
+.steps{display:flex;flex-direction:column;gap:var(--space-xl);margin-top:var(--space-2xl)}
+.step{display:grid;grid-template-columns:auto 1fr;gap:var(--space-lg);align-items:start}
+.step .num{font-family:"Bricolage Grotesque";font-weight:700;font-size:1.5rem;color:var(--gold-deep);
+  width:44px;height:44px;border:1.5px solid var(--gold);border-radius:999px;display:grid;place-items:center}
+.step h3{font-size:var(--step-1);margin-bottom:2px}
+.step p{color:var(--ink-soft);font-size:var(--step-0)}
+
+/* ---------- product grid ---------- */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:var(--space-xl)}
+.card{background:var(--paper-2);border-radius:16px;overflow:hidden;transition:transform .3s;
+  display:flex;flex-direction:column}
+.card:hover{transform:translateY(-6px)}
+.card:hover .card-img img{transform:scale(1.04)}
+.card-img{position:relative;aspect-ratio:1;background:
+  radial-gradient(120% 120% at 50% 0,oklch(0.96 0.01 80),oklch(0.9 0.014 80));overflow:hidden}
+.card-img img{width:100%;height:100%;object-fit:contain;padding:var(--space-xl);
+  transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.tag{position:absolute;top:var(--space-md);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;
+  font-weight:800;padding:5px var(--space-sm);border-radius:6px}
+.tag.save{left:var(--space-md);background:var(--sale);color:var(--paper)}
+.tag.best{right:var(--space-md);background:var(--ink);color:var(--gold)}
+.tag.new{right:var(--space-md);background:var(--gold);color:var(--ink)}
+.card-body{padding:var(--space-lg);display:flex;flex-direction:column;gap:var(--space-sm);flex:1}
+.card-body .cat{font-size:var(--step--1);color:var(--ink-faint);letter-spacing:0.06em;text-transform:uppercase;font-weight:600}
+.card-body h3{font-size:var(--step-1);font-weight:600;letter-spacing:-0.01em}
+.swatches{display:flex;gap:6px;margin-top:2px}
+.sw{width:16px;height:16px;border-radius:999px;border:1px solid oklch(0 0 0 /.12)}
+.sw.oak{background:oklch(0.72 0.09 70)}.sw.walnut{background:oklch(0.42 0.06 50)}.sw.black{background:oklch(0.28 0.008 70)}
+.stars{display:flex;align-items:center;gap:6px;font-size:var(--step--1);color:var(--ink-faint)}
+.stars .s{color:var(--gold)}
+.price{margin-top:auto;padding-top:var(--space-sm);display:flex;align-items:baseline;gap:var(--space-sm);flex-wrap:wrap}
+.price .now{font-family:"Bricolage Grotesque";font-weight:700;font-size:1.35rem}
+.price .was{color:var(--ink-faint);text-decoration:line-through;font-size:var(--step--1)}
+.price .transfer{width:100%;font-size:var(--step--1);color:var(--gold-deep);font-weight:600}
+
+/* ---------- PDP configurator preview ---------- */
+.pdp{background:var(--ink);color:var(--paper)}
+.pdp .sec-head h2,.pdp .eyebrow{color:var(--paper)}
+.pdp .eyebrow{color:oklch(0.78 0.09 74)}
+.pdp-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4xl);align-items:center}
+.pdp-stage{background:radial-gradient(120% 120% at 50% 20%,oklch(0.34 0.02 70),oklch(0.18 0.01 70));
+  border-radius:20px;aspect-ratio:1;display:grid;place-items:center;padding:var(--space-3xl);position:relative}
+.pdp-stage img{width:100%;object-fit:contain;filter:drop-shadow(0 30px 40px oklch(0 0 0 /.5))}
+.pdp-panel h3{font-size:var(--step-2);color:var(--paper);margin-bottom:var(--space-sm)}
+.pdp-price{display:flex;align-items:baseline;gap:var(--space-md);margin:var(--space-lg) 0}
+.pdp-price .now{font-family:"Bricolage Grotesque";font-weight:700;font-size:2rem;color:var(--gold)}
+.pdp-price .was{text-decoration:line-through;color:oklch(0.7 0.01 80)}
+.addons{margin:var(--space-xl) 0;border-top:1px solid oklch(1 0 0 /.12)}
+.addon{display:flex;align-items:center;gap:var(--space-md);padding:var(--space-md) 0;
+  border-bottom:1px solid oklch(1 0 0 /.12)}
+.addon .box{width:22px;height:22px;border-radius:6px;border:1.5px solid oklch(0.7 0.01 80);flex-shrink:0;
+  display:grid;place-items:center;transition:.2s}
+.addon.on .box{background:var(--gold);border-color:var(--gold)}
+.addon.on .box::after{content:"✓";color:var(--ink);font-weight:800;font-size:0.8rem}
+.addon .an{flex:1;font-weight:600}
+.addon .ap{color:oklch(0.82 0.01 80);font-size:var(--step--1)}
+.addon.on{opacity:1}.addon:not(.on){opacity:.62}
+.pdp-summary{display:flex;justify-content:space-between;align-items:center;font-size:var(--step--1);
+  color:oklch(0.82 0.01 80);margin-bottom:var(--space-md)}
+.pdp-summary b{color:var(--gold);font-family:"Bricolage Grotesque";font-size:1.1rem}
+.pdp .btn-gold{width:100%;justify-content:center}
+
+/* ---------- trust bar ---------- */
+.trust{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-xl);
+  border-block:1px solid var(--line);padding-block:var(--space-3xl)}
+.trust .t{display:flex;flex-direction:column;gap:6px}
+.trust .t svg{width:26px;height:26px;stroke:var(--gold-deep);stroke-width:1.5;fill:none}
+.trust .t h4{font-size:var(--step-0);font-weight:700}
+.trust .t p{font-size:var(--step--1);color:var(--ink-soft)}
+
+/* ---------- editorial craft ---------- */
+.craft-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:stretch;border-radius:20px;overflow:hidden}
+.craft-copy{background:var(--paper-2);padding:var(--space-5xl) var(--space-4xl);display:flex;
+  flex-direction:column;justify-content:center;gap:var(--space-lg)}
+.craft-copy h2{font-size:var(--step-2)}
+.craft-copy p{color:var(--ink-soft);max-width:46ch}
+.craft-img{background:var(--ink)}
+.craft-img img{width:100%;height:100%;object-fit:cover;min-height:420px}
+
+/* ---------- newsletter + footer ---------- */
+.news{text-align:center;background:var(--ink);color:var(--paper)}
+.news h2{font-size:var(--step-2);color:var(--paper);max-width:20ch;margin-inline:auto}
+.news p{color:oklch(0.8 0.01 80);margin-top:var(--space-md)}
+.news form{display:flex;gap:var(--space-sm);max-width:460px;margin:var(--space-2xl) auto 0}
+.news input{flex:1;background:transparent;border:1px solid oklch(0.55 0.01 80);border-radius:999px;
+  padding:var(--space-md) var(--space-xl);color:var(--paper);font-family:inherit;font-size:var(--step-0)}
+.news input::placeholder{color:oklch(0.7 0.01 80)}
+footer{background:var(--paper-2);padding-block:var(--space-4xl) var(--space-2xl)}
+.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:var(--space-2xl);margin-bottom:var(--space-4xl)}
+.foot-brand .wordmark{text-align:left;font-size:2rem}
+.foot-brand p{color:var(--ink-soft);max-width:34ch;margin-top:var(--space-md);font-size:var(--step--1)}
+.foot-col h5{font-size:var(--step--1);letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);
+  margin-bottom:var(--space-md);font-weight:700}
+.foot-col a{display:block;color:var(--ink-soft);padding:5px 0;font-size:var(--step-0);transition:color .2s}
+.foot-col a:hover{color:var(--gold-deep)}
+.foot-bottom{border-top:1px solid var(--line);padding-top:var(--space-xl);display:flex;
+  justify-content:space-between;color:var(--ink-faint);font-size:var(--step--1);flex-wrap:wrap;gap:var(--space-sm)}
+
+/* ---------- responsive ---------- */
+@media(max-width:900px){
+  .nav{grid-template-columns:auto 1fr auto}
+  .nav-left .link,.nav-right .link{display:none}
+  .system-grid,.pdp-grid,.craft-grid{grid-template-columns:1fr}
+  .craft-img img{min-height:280px}
+  .trust{grid-template-columns:repeat(2,1fr);gap:var(--space-2xl)}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  section{padding-block:var(--space-5xl)}
+  .hero{min-height:80vh}
+}
+@media(max-width:560px){
+  .foot-grid{grid-template-columns:1fr}
+  .trust{grid-template-columns:1fr}
+  .news form{flex-direction:column}
+  .news input{text-align:center}
+}
+.badge-note{position:fixed;bottom:14px;right:14px;z-index:99;background:var(--gold);color:var(--ink);
+  font-size:0.7rem;font-weight:800;letter-spacing:0.06em;padding:7px 12px;border-radius:999px;
+  box-shadow:0 6px 20px oklch(0 0 0 /.25);text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div class="announce">Envíos a todo el país &nbsp;·&nbsp; <b>10% OFF</b> con transferencia &nbsp;·&nbsp; <b>3 cuotas</b> sin interés</div>
+
+<header>
+  <nav class="nav wrap">
+    <div class="nav-left">
+      <a class="link" href="#">Escritorios</a>
+      <a class="link" href="#">Accesorios</a>
+      <a class="link" href="#">Bundles</a>
+    </div>
+    <a class="wordmark" href="#">Roda<span>k</span></a>
+    <div class="nav-right">
+      <a class="link" href="#">Nosotros</a>
+      <svg class="icn" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <span class="cartpill"><svg class="icn" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> <span class="dot">2</span></span>
+    </div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero" style="padding:0">
+  <img class="hero-img" src="https://rodak.ar/wp-content/uploads/2023/08/134.png" alt="">
+  <div class="hero-inner wrap">
+    <span class="eyebrow" style="color:var(--gold)">El sistema de setup Rodak</span>
+    <h1>Diseñá tu<br><em>setup.</em></h1>
+    <p>Escritorios de madera maciza y hierro. Sumales los accesorios que combinan y armá tu espacio de trabajo ideal.</p>
+    <div class="cta-row">
+      <a class="btn btn-gold" href="#sistema">Armar mi setup →</a>
+      <a class="btn btn-ghost-light" href="#productos">Ver escritorios</a>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="strip"><div class="strip-track">
+  <span>Madera maciza · Hierro macizo · <b>Hecho en Argentina</b> · Envíos a todo el país · Diseño modular ·&nbsp;</span>
+  <span>Madera maciza · Hierro macizo · <b>Hecho en Argentina</b> · Envíos a todo el país · Diseño modular ·&nbsp;</span>
+</div></div>
+
+<!-- THE SYSTEM -->
+<section class="system" id="sistema">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow">Modular por diseño</span><h2>Un escritorio.<br>Infinitas configuraciones.</h2></div>
+      <p>No vendemos muebles sueltos. Vendemos un sistema: elegís tu escritorio y le sumás los accesorios que necesitás, todo pensado para combinar.</p>
+    </div>
+    <div class="system-grid">
+      <div class="system-visual">
+        <img src="https://rodak.ar/wp-content/uploads/2023/08/210.png" alt="Setup modular Rodak">
+        <span class="pin p1">Elevación de monitor</span>
+        <span class="pin p2">Bandeja de teclado</span>
+        <span class="pin p3">Soporte auricular</span>
+      </div>
+      <div>
+        <div class="steps">
+          <div class="step"><span class="num">1</span><div><h3>Elegí tu base</h3><p>Escritorio en madera de paraíso, cedro o negro. La medida que entre en tu espacio.</p></div></div>
+          <div class="step"><span class="num">2</span><div><h3>Sumá accesorios</h3><p>Elevaciones, bandejas, soportes y organizadores que combinan con tu escritorio.</p></div></div>
+          <div class="step"><span class="num">3</span><div><h3>Armá el combo</h3><p>Comprá todo junto como bundle y ahorrá. Tu setup completo, en un solo pedido.</p></div></div>
+        </div>
+        <a class="btn btn-dark" href="#" style="margin-top:var(--space-2xl)">Empezá a diseñar →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="productos">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow">Lo más elegido</span><h2>Escritorios & sets</h2></div>
+      <a class="btn btn-ghost" href="#">Ver todo el catálogo →</a>
+    </div>
+    <div class="pgrid">
+      <article class="card">
+        <div class="card-img"><span class="tag best">Best seller</span><img src="https://rodak.ar/wp-content/uploads/2023/08/134.png" alt="Escritorio Brent"></div>
+        <div class="card-body">
+          <span class="cat">Escritorios</span><h3>Escritorio Brent Paraíso</h3>
+          <div class="swatches"><span class="sw oak"></span><span class="sw walnut"></span><span class="sw black"></span></div>
+          <div class="stars"><span class="s">★★★★★</span> 42 reseñas</div>
+          <div class="price"><span class="now">$1.112.713</span><span class="transfer">$1.001.442 con transferencia</span></div>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-img"><span class="tag save">-18%</span><img src="https://rodak.ar/wp-content/uploads/2023/08/102.png" alt="Escritorio Vancouver"></div>
+        <div class="card-body">
+          <span class="cat">Bundle</span><h3>Set Vancouver + Elevación</h3>
+          <div class="swatches"><span class="sw oak"></span><span class="sw black"></span></div>
+          <div class="stars"><span class="s">★★★★★</span> 27 reseñas</div>
+          <div class="price"><span class="now">$690.000</span><span class="was">$841.320</span><span class="transfer">$621.000 con transferencia</span></div>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-img"><span class="tag new">Nuevo</span><img src="https://rodak.ar/wp-content/uploads/2023/08/210.png" alt="Estantería Franklin"></div>
+        <div class="card-body">
+          <span class="cat">Estanterías</span><h3>Estantería Franklin Paraíso</h3>
+          <div class="swatches"><span class="sw oak"></span><span class="sw walnut"></span></div>
+          <div class="stars"><span class="s">★★★★☆</span> 15 reseñas</div>
+          <div class="price"><span class="now">$1.449.726</span><span class="transfer">$1.304.753 con transferencia</span></div>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-img"><img src="https://rodak.ar/wp-content/uploads/2023/08/62.png" alt="Cajonera Kendall"></div>
+        <div class="card-body">
+          <span class="cat">Complementos</span><h3>Cajonera Kendall Paraíso</h3>
+          <div class="swatches"><span class="sw oak"></span><span class="sw black"></span></div>
+          <div class="stars"><span class="s">★★★★★</span> 9 reseñas</div>
+          <div class="price"><span class="now">$389.900</span><span class="transfer">$350.910 con transferencia</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- PDP CONFIGURATOR PREVIEW -->
+<section class="pdp">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow">El diferencial</span><h2>Armá tu combo sin salir del producto</h2></div>
+      <p style="color:oklch(0.8 0.01 80);max-width:42ch">Como en las mejores tiendas del mundo: elegí el escritorio, sumá accesorios y mirá el precio actualizarse en vivo.</p>
+    </div>
+    <div class="pdp-grid">
+      <div class="pdp-stage"><img src="https://rodak.ar/wp-content/uploads/2023/08/134.png" alt="Escritorio Brent"></div>
+      <div class="pdp-panel">
+        <span class="eyebrow">Escritorio · Madera de paraíso</span>
+        <h3>Escritorio Brent</h3>
+        <div class="pdp-price"><span class="now">$1.186.900</span><span class="was">$1.311.600</span></div>
+        <div class="addons">
+          <label class="addon on"><span class="box"></span><span class="an">Elevación de monitor</span><span class="ap">+ $58.900</span></label>
+          <label class="addon on"><span class="box"></span><span class="an">Bandeja de teclado</span><span class="ap">+ $34.100</span></label>
+          <label class="addon"><span class="box"></span><span class="an">Soporte auricular</span><span class="ap">+ $29.117</span></label>
+          <label class="addon"><span class="box"></span><span class="an">Soporte celular</span><span class="ap">+ $6.135</span></label>
+        </div>
+        <div class="pdp-summary"><span>Tenés <b>2 accesorios</b> en tu combo</span><span>Ahorrás <b>$124.700</b></span></div>
+        <a class="btn btn-gold" href="#">Agregar combo al carrito · $1.186.900</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section style="padding-block:0"><div class="wrap"><div class="trust">
+  <div class="t"><svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/></svg><h4>Hecho en Argentina</h4><p>Madera maciza e hierro, fabricado a mano.</p></div>
+  <div class="t"><svg viewBox="0 0 24 24"><rect x="1" y="6" width="15" height="12" rx="2"/><path d="M16 9h4l3 3v4h-7z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg><h4>Envíos a todo el país</h4><p>Coordinamos la entrega de tu setup.</p></div>
+  <div class="t"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><h4>3 cuotas sin interés</h4><p>Con tarjeta, o 10% off por transferencia.</p></div>
+  <div class="t"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg><h4>Cambios simples</h4><p>Garantía y soporte real por WhatsApp.</p></div>
+</div></div></section>
+
+<!-- CRAFT EDITORIAL -->
+<section>
+  <div class="wrap"><div class="craft-grid">
+    <div class="craft-copy">
+      <span class="eyebrow">Nuestra obsesión</span>
+      <h2>Muebles que duran<br>toda una vida.</h2>
+      <p>Cada escritorio Rodak se hace con madera maciza enchapada con canto natural y estructura de hierro con pintura electroestática. Piezas robustas, pensadas para tu espacio de trabajo diario.</p>
+      <a class="btn btn-dark" href="#" style="align-self:flex-start">Conocé cómo los hacemos →</a>
+    </div>
+    <div class="craft-img"><img src="https://rodak.ar/wp-content/uploads/2023/08/102.png" alt="Detalle de fabricación Rodak"></div>
+  </div></div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="news"><div class="wrap">
+  <h2>Sumate a la comunidad Rodak</h2>
+  <p>Nuevos productos, ideas de setup y descuentos exclusivos. Sin spam.</p>
+  <form onsubmit="return false">
+    <input type="email" placeholder="Tu email" aria-label="Email">
+    <button class="btn btn-gold" type="submit">Suscribirme</button>
+  </form>
+</div></section>
+
+<!-- FOOTER -->
+<footer><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <span class="wordmark">Roda<span style="color:var(--gold)">k</span></span>
+      <p>Escritorios, setups y muebles diseñados y fabricados en Argentina. Diseñá tu espacio de trabajo ideal.</p>
+    </div>
+    <div class="foot-col"><h5>Tienda</h5><a href="#">Escritorios</a><a href="#">Accesorios</a><a href="#">Bundles</a><a href="#">Entrega inmediata</a></div>
+    <div class="foot-col"><h5>Ayuda</h5><a href="#">Envíos</a><a href="#">Cambios</a><a href="#">Medios de pago</a><a href="#">Contacto</a></div>
+    <div class="foot-col"><h5>Rodak</h5><a href="#">Nosotros</a><a href="#">Cómo los hacemos</a><a href="#">Instagram</a><a href="#">WhatsApp</a></div>
+  </div>
+  <div class="foot-bottom"><span>© 2026 Rodak — Hecho en Argentina.</span><span>Mockup de dirección visual · estructura balolo + marca Rodak</span></div>
+</div></footer>
+
+<div class="badge-note">Mockup · dirección visual</div>
+</body>
+</html>
