@@ -22,11 +22,11 @@ function getPrismaClient(): PrismaClient {
 
   const client = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
-  // Reuse the client across Next.js dev hot-reloads so we don't exhaust
-  // Postgres connections; a fresh singleton per process is fine in production.
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = client;
-  }
+  // Cache unconditionally: the exported Proxy calls getPrismaClient() on
+  // EVERY property access, so without this cache each query would build a
+  // new client + pg pool (connection exhaustion under real traffic). The
+  // global also survives Next.js dev hot-reloads.
+  globalForPrisma.prisma = client;
 
   return client;
 }
