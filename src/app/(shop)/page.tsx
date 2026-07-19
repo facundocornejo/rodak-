@@ -1,4 +1,4 @@
-import { getProductsForListing } from "@/lib/data/products";
+import { getProductsForListing, type ProductListingDTO } from "@/lib/data/products";
 import { formatPriceCents } from "@/lib/format";
 
 // No DB is reachable during `next build` in CI (see design D11); force
@@ -6,7 +6,11 @@ import { formatPriceCents } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const products = await getProductsForListing();
+  // A catalog query failure must propagate: `/` is Coolify's healthcheck
+  // path, so this page has to answer non-200 when the DB is down. The
+  // empty catalog below is the only anticipated non-error state; failures
+  // render `src/app/error.tsx`.
+  const products: ProductListingDTO[] = await getProductsForListing();
 
   return (
     <main>
