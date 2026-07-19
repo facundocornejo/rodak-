@@ -151,15 +151,128 @@ Work Unit 3 wires this into the container start command **after**
 fails loud on drift instead of silently serving mismatched code and schema:
 `npx prisma migrate deploy && npm run db:check-drift && node server.js`.
 
-## Deployment
+## Continuous Integration
 
-Deployment pipeline (Docker build, CI, Coolify staging setup) lands in a
-later work unit. This skeleton only covers local development.
+`.github/workflows/ci.yml` runs on every push and pull request targeting
+`main`: `npm ci` → `prisma generate` (dummy `DATABASE_URL`, no DB
+contacted) → lint → typecheck → test → `next build`. **CI is a quality
+gate, not the deployer** — Coolify's GitHub App redeploys `main`
+independently of CI's result (see design D11). Coolify webhook auto-deploy
+and this workflow are two separate integrations against the same repo;
+merging via PR is what makes CI run before code reaches `main` in practice.
+Coupling CI success to the deploy itself is a later refinement, not part of
+Fase 0.
 
-**Planned for Work Unit 3** (recorded now so the drift-check dependency
-isn't lost): the container start command runs `prisma migrate deploy`
-first, then the schema-drift check (`npm run db:check-drift`), then starts
-the server — in that order — so staging fails loud instead of deploying
-against (or serving alongside) a manually-altered database. See "Detecting
-schema drift" above for why the drift check must run after migrations, not
-before.
+## Deployment (Coolify)
+
+The app deploys as a **Coolify Application** on the existing netcup VPS
+(shared with other projects — Coolify + Traefik already own ports 80/443;
+see design D6/D7). Everything below except "Verification checklist" is a
+**one-time manual setup Facu runs in the Coolify dashboard and DNS
+provider** — no agent in this pipeline can reach the VPS or Cloudflare.
+
+### 1. Create the Application
+
+1. In Coolify: **New Resource → Application → GitHub App** source (not a
+   plain Git URL — the GitHub App gives push-triggered auto-deploy and PR
+   previews). Select `facundocornejo/rodak-`, branch `main`.
+2. **Build pack: Dockerfile**, path `docker/Dockerfile`, build context repo
+   root (the Dockerfile expects `package.json`/`prisma/` at the root, not
+   inside `docker/`). Do **not** use Nixpacks — it has known Prisma/OpenSSL
+   build failures (see design D6).
+3. **Port: 3000** (matches `EXPOSE 3000` in the Dockerfile and Next's
+   default `node server.js` listen port).
+4. **Healthcheck path: `/`** (no dedicated `/api/health` route exists yet
+   in Fase 0 — see design "Open Questions"). Coolify's healthcheck runs
+   `curl` **inside** the container; the Dockerfile installs `curl` in the
+   final stage specifically for this (see design D6 risk register
+   "Healthcheck gotcha" — without it, deploys fail their healthcheck even
+   though the app itself works).
+5. **Persistent volume**: mount a volume at `/app/.next/cache` (PERFORMANCE.md
+   §2/§6 — without this, every deploy re-encodes every AVIF/WebP image
+   variant from scratch instead of reusing the sharp cache).
+6. **Concurrent builds: 1 server-wide** (Coolify setting, shared-server rule
+   — Next builds have OOMed 8 GB servers on this platform; see design D6).
+7. **Resource limits**: set CPU/memory limits to roughly **1.5× expected
+   usage** for this app (shared-server rule from the netcup runbook — this
+   VPS also hosts other projects). If a build OOMs (exit 137), add
+   `NODE_OPTIONS=--max-old-space-size=4096` as a **build-time** env var
+   first before raising the limit further.
+
+### 2. Create the Postgres resource
+
+1. **New Resource → Postgres** (Coolify-managed, not our
+   `docker-compose.dev.yml` — that file is dev-only, see design D7).
+2. **Never** enable "make it publicly available" — Docker port publishing
+   bypasses UFW, so a published Postgres port is internet-exposed
+   regardless of any host firewall rule (deploy-guide hard rule; design
+   D7).
+3. Copy the resource's **internal Docker-network connection string**
+   (`postgres://…@<container-name>:5432/…`, not `localhost`, not the
+   server's public IP) — this is the value for `DATABASE_URL` below.
+
+### 3. Configure environment variables (in the Coolify UI — never in this repo)
+
+| Variable       | Value                                                                                   |
+| -------------- | ---------------------------------------------------------------------------------------- |
+| `DATABASE_URL` | The Postgres resource's **internal network** connection string from step 2.3.            |
+| `STAGING_HOST` | `rodak.fromdevdiego.com` (exact subdomain — Facu's call per design; drives `robots.ts` noindex and `metadataBase`). |
+| `SITE_URL`     | Leave **empty** until the real production cutover (Fase 6) — see `src/lib/site-url.ts` precedence. Setting it early would make `robots.ts`/`metadataBase` behave as if this were the real production domain. |
+| `NODE_ENV`     | `production` (Coolify's own runtime default for Applications; confirm it is set). |
+
+None of these are `NEXT_PUBLIC_*` today, so none need Coolify's "Build
+Variable" flag (that flag exists for client-bundled env vars, which force a
+rebuild on change — recorded for later phases per design D13).
+
+### 4. Cloudflare DNS
+
+1. Add an **A record**: `rodak` (or the exact `STAGING_HOST` subdomain) →
+   the netcup VPS public IP (`159.195.17.216`).
+2. **Gray cloud (DNS only) initially**, not orange — this lets Traefik's
+   Let's Encrypt HTTP-01/TLS-ALPN challenge reach the origin directly for
+   first-issuance. Switch to orange-cloud proxying (and Cloudflare SSL mode
+   **Full (strict)**, never Flexible) once the certificate is confirmed
+   issued — see PERFORMANCE.md §4 for the full CDN setup, which is a later
+   optimization pass, not required for Fase 0's milestone deploy.
+
+### 5. Deploy
+
+Push to `main` (or click "Deploy" in Coolify for the first run). The
+container start command is:
+
+```
+npx prisma migrate deploy && npm run db:check-drift && node server.js
+```
+
+Order matters — see "Detecting schema drift" above: `migrate deploy` must
+run first, or the drift check false-positives on every legitimate pending
+migration, including the very first deploy ever on an empty database.
+
+### Verification checklist (run after each deploy — the agent-verifiable part)
+
+- [ ] `curl -sSI https://rodak.fromdevdiego.com/` from **outside** the VPS
+      returns `200` (or the app's real status) with a valid TLS certificate
+      chain (`curl -v` shows the Let's Encrypt-issued cert, no `-k` needed).
+- [ ] The response body contains the seeded product names (confirms the DB
+      connection, migrations, and seed all worked end-to-end).
+- [ ] An external port scan of the server's public IP (`nmap -p 5432
+      159.195.17.216` or equivalent `ss`/`nc` check run from outside the
+      VPS) shows **5432 NOT reachable** — only 22/80/443 (+ the Coolify
+      dashboard port until closed) should answer. This proves the Postgres
+      resource from step 2 is internal-network-only, per the "Database
+      Network Isolation" spec requirement.
+- [ ] The Coolify deploy log shows the start command's three steps running
+      in order — `prisma migrate deploy` output, then `db:check-drift`
+      output (exit 0, no drift), then the Next.js server startup log —
+      confirming migrations really ran as part of the deploy and the drift
+      check ran in the correct position.
+- [ ] Pushing one intentionally failing commit (e.g. a typecheck error)
+      reports CI failure on that SHA; a following passing commit reports
+      success (this is a `main`-branch check, not staging-specific — see
+      "Continuous Integration" above).
+
+Steps 1–5 (Coolify Application setup, Postgres resource, DNS) are **manual,
+one-time actions for Facu** — no tool in this pipeline has network access
+to the VPS, the Coolify dashboard, or the Cloudflare account. The
+verification checklist's `curl`/`nmap`/log-reading steps can be run by
+whoever has that access once the deploy is live.
