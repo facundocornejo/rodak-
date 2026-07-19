@@ -30,8 +30,7 @@ describe("prisma client singleton", () => {
     expect(() => prisma.product).toThrowError(/DATABASE_URL is not set/);
   });
 
-  it("constructs the underlying client exactly once across repeated access in production", async () => {
-    vi.stubEnv("NODE_ENV", "production");
+  it("constructs the underlying client exactly once across repeated access", async () => {
     vi.stubEnv("DATABASE_URL", "postgresql://user:pass@localhost:5434/db");
     const { prisma } = await import("./db");
 
