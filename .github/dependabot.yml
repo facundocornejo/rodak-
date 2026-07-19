@@ -1,0 +1,16 @@
+# Keeps the SHA-pinned GitHub Actions in .github/workflows/ current: when a
+# new release ships, Dependabot updates both the pinned commit SHA and its
+# `# vX.Y.Z` comment. Scoped to github-actions on purpose — npm updates are
+# left out for now to avoid PR noise this early in the project; add an
+# `npm` ecosystem block here when we want dependency bumps too.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      # One weekly PR for all action bumps instead of one per action.
+      actions:
+        patterns:
+          - "*"
