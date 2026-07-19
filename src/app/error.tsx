@@ -12,7 +12,7 @@ import { useEffect } from "react";
  * Coolify's healthcheck against `/` can detect a DB outage (the server
  * logs the original error with its digest before this boundary renders).
  */
-export default function GlobalError({
+export default function RootError({
   error,
   reset,
 }: {
