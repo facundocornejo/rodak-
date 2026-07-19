@@ -6,25 +6,11 @@ import { formatPriceCents } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  let products: ProductListingDTO[];
-
-  try {
-    products = await getProductsForListing();
-  } catch (error) {
-    // Anticipated-error handling, distinct from the empty-catalog state
-    // below (an empty result is not an error — it renders normally). This
-    // is a Server Component, so `console.error` here runs on the server,
-    // not in the browser; `src/app/error.tsx` remains the fallback boundary
-    // for genuinely unexpected errors elsewhere in the tree.
-    console.error("[HomePage] catalog query failed:", error);
-
-    return (
-      <main>
-        <h1>Rodak</h1>
-        <p>No pudimos cargar el catálogo. Probá de nuevo en unos minutos.</p>
-      </main>
-    );
-  }
+  // A catalog query failure must propagate: `/` is Coolify's healthcheck
+  // path, so this page has to answer non-200 when the DB is down. The
+  // empty catalog below is the only anticipated non-error state; failures
+  // render `src/app/error.tsx`.
+  const products: ProductListingDTO[] = await getProductsForListing();
 
   return (
     <main>
