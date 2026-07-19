@@ -26,8 +26,8 @@ jobs:
       # Third-party actions are pinned to a full commit SHA (not a mutable
       # tag) so a compromised or retagged release can't silently change what
       # runs in CI. The trailing comment tracks the human-readable version;
-      # bump both together. v7 runs on Node 24 (v4 targeted the now-deprecated
-      # Node 20 runtime).
+      # Dependabot (.github/dependabot.yml) bumps the SHA and the comment
+      # together. These pins are v7.0.0, which runs on Node 24.
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
