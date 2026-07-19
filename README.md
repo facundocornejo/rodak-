@@ -113,7 +113,37 @@ so `npm run dev` needs a reachable `DATABASE_URL`.
 take in staging/production — see `prisma.config.ts` and design D8. Never run
 `prisma db push` or hand-edit tables in any shared environment.
 
+### Detecting schema drift
+
+`prisma migrate deploy` does **not** detect or reject manual schema changes
+made outside migration history — it only applies pending migration files and
+happily reports "No pending migrations" even if the live table shape no
+longer matches `prisma/schema.prisma` (verified live: an `ALTER TABLE` run
+by hand is invisible to `migrate deploy`). Drift must be checked separately:
+
+```bash
+DATABASE_URL="postgresql://rodak:rodak_dev_only@<host>:5434/rodak_dev" npm run db:check-drift
+```
+
+This runs `prisma migrate diff --from-config-datasource --to-schema=prisma/schema.prisma --exit-code`,
+comparing the live database against the schema file. Exit codes: `0` = no
+drift, `2` = drift detected (also treated as a script failure by npm/CI —
+any non-zero exit fails the step), `1` = the command itself errored (e.g.
+bad `DATABASE_URL`). Run it before trusting `migrate deploy` output and
+after applying any out-of-band change you need to investigate.
+
+Work Unit 3 wires this into the container start command **before**
+`prisma migrate deploy`, so a deployment fails loud on drift instead of
+silently serving mismatched code and schema:
+`npm run db:check-drift && npx prisma migrate deploy && node server.js`.
+
 ## Deployment
 
 Deployment pipeline (Docker build, CI, Coolify staging setup) lands in a
 later work unit. This skeleton only covers local development.
+
+**Planned for Work Unit 3** (recorded now so the drift-check dependency
+isn't lost): the container start command runs the schema-drift check
+(`npm run db:check-drift`) BEFORE `prisma migrate deploy`, so staging fails
+loud instead of deploying against a manually-altered database — see
+"Detecting schema drift" above.
