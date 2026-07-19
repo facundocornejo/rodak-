@@ -129,13 +129,27 @@ This runs `prisma migrate diff --from-config-datasource --to-schema=prisma/schem
 comparing the live database against the schema file. Exit codes: `0` = no
 drift, `2` = drift detected (also treated as a script failure by npm/CI —
 any non-zero exit fails the step), `1` = the command itself errored (e.g.
-bad `DATABASE_URL`). Run it before trusting `migrate deploy` output and
-after applying any out-of-band change you need to investigate.
+bad `DATABASE_URL`).
 
-Work Unit 3 wires this into the container start command **before**
-`prisma migrate deploy`, so a deployment fails loud on drift instead of
-silently serving mismatched code and schema:
-`npm run db:check-drift && npx prisma migrate deploy && node server.js`.
+**Run this AFTER `prisma migrate deploy`, never before.** The check compares
+the live database against the *target* schema (`prisma/schema.prisma`), so
+if there is a legitimate pending migration not yet applied, the live
+database necessarily differs from the target schema too — running the drift
+check first would report drift on every ordinary deploy that ships a schema
+change, including the very first deploy ever (verified live: on a freshly
+created, fully empty database, `db:check-drift` reports every table as
+"drift" with exit 2 — that's simply "nothing has been migrated yet", not
+tampering). Checking AFTER `migrate deploy` still catches real drift,
+because a manual out-of-band change is never part of any migration file, so
+it survives `migrate deploy` untouched and still shows up in the diff
+(verified live: applied `migrate deploy` to a clean DB, confirmed
+`db:check-drift` was clean, added a manual `ALTER TABLE` probe column,
+re-ran `db:check-drift` — exit 2, correctly flagged the extra column).
+
+Work Unit 3 wires this into the container start command **after**
+`prisma migrate deploy` and before starting the server, so a deployment
+fails loud on drift instead of silently serving mismatched code and schema:
+`npx prisma migrate deploy && npm run db:check-drift && node server.js`.
 
 ## Deployment
 
@@ -143,7 +157,9 @@ Deployment pipeline (Docker build, CI, Coolify staging setup) lands in a
 later work unit. This skeleton only covers local development.
 
 **Planned for Work Unit 3** (recorded now so the drift-check dependency
-isn't lost): the container start command runs the schema-drift check
-(`npm run db:check-drift`) BEFORE `prisma migrate deploy`, so staging fails
-loud instead of deploying against a manually-altered database — see
-"Detecting schema drift" above.
+isn't lost): the container start command runs `prisma migrate deploy`
+first, then the schema-drift check (`npm run db:check-drift`), then starts
+the server — in that order — so staging fails loud instead of deploying
+against (or serving alongside) a manually-altered database. See "Detecting
+schema drift" above for why the drift check must run after migrations, not
+before.
