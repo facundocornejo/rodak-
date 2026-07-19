@@ -1,0 +1,52 @@
+name: CI
+
+# Quality gate only (design D11) — this workflow does NOT deploy anything.
+# Coolify is connected to this repo via its GitHub App and redeploys
+# automatically on every push to `main`, independently of this workflow's
+# result. CI existing to catch problems is why the team should merge via PR
+# (CI runs on the PR before merge); a red `main` commit still auto-deploys
+# today (accepted Fase 0 risk — see design D11 / risk register "CI not
+# gating deploy"). Coupling CI success to the deploy is a later refinement.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prisma generate
+        # prisma.config.ts calls env("DATABASE_URL") (Prisma 7 — see
+        # prisma.config.ts). No database is contacted for `generate`; a
+        # syntactically valid dummy value only satisfies the config loader.
+        env:
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        # `next build` needs no DATABASE_URL at all: the listing page is
+        # `force-dynamic` and the Prisma client is a lazily-constructed
+        # Proxy that defers the DATABASE_URL check to the first real query
+        # (see src/lib/db.ts). No Postgres service container is needed here.
+        run: npm run build
