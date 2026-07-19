@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7: the connection URL is no longer set here. It is resolved by
+// `prisma.config.ts` (CLI/Migrate) and by the driver adapter passed to
+// `PrismaClient` at runtime (see src/lib/db.ts).
+datasource db {
+  provider = "postgresql"
+}
+
+// Fase 0 catalog subset. See design D2 (sdd/fase-0-fundaciones/design):
+// - cuid string IDs
+// - material/size are free-form strings, not enums (small, evolving catalog)
+// - price_cents is always an integer (never float) — see spec "Money and Date Invariants"
+// - timestamps use timestamptz to make the UTC storage invariant explicit
+// - slugs preserve the existing WooCommerce URLs (see design D4)
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+
+  categories Category[]
+  variants   ProductVariant[]
+  media      ProductMedia[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+}
+
+model ProductVariant {
+  id String @id @default(cuid())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  sku        String  @unique
+  material   String?
+  sizeMm     String?
+  priceCents Int
+  stock      Int     @default(0)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+}
+
+model Category {
+  id   String @id @default(cuid())
+  slug String @unique
+  name String
+
+  products Product[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+}
+
+model ProductMedia {
+  id String @id @default(cuid())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  url      String
+  alt      String?
+  position Int     @default(0)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+}

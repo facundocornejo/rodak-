@@ -1,0 +1,25 @@
+# Local development database ONLY. Staging/production Postgres is a
+# Coolify-managed resource on the internal Docker network (see design D7) —
+# this file is never used outside a developer's machine.
+#
+# Run via WSL (Windows Prisma talks to it over localhost:5434):
+#   wsl docker compose -f docker-compose.dev.yml up -d
+#
+# Host port is 5434, not the default 5432: this dev machine runs other
+# projects' Postgres containers that already occupy 5432/5433 in the same
+# WSL Docker daemon. Update DATABASE_URL to match if you change this port.
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rodak
+      POSTGRES_PASSWORD: rodak_dev_only
+      POSTGRES_DB: rodak_dev
+    ports:
+      - "5434:5432"
+    volumes:
+      - rodak_pgdata:/var/lib/postgresql/data
+
+volumes:
+  rodak_pgdata:
