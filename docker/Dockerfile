@@ -5,15 +5,23 @@
 # Base is `node:24-slim` (Debian/glibc), not an Alpine/musl image: sharp
 # (next/image optimizer) needs a glibc memory allocator tuned via
 # MALLOC_ARENA_MAX (see PERFORMANCE.md §2 and the runtime stage below).
+#
+# Pinned by digest (not just the floating `node:24-slim` tag) so every build
+# — local, CI, and Coolify — resolves the exact same bytes and a retagged or
+# compromised upstream can't slip in silently. Declared once and reused by
+# all three stages; to move to a newer node:24-slim, bump this one line with
+# the digest from `docker pull node:24-slim && docker inspect \
+# --format='{{index .RepoDigests 0}}' node:24-slim`.
+ARG NODE_IMAGE=node:24-slim@sha256:6f7b03f7c2c8e2e784dcf9295400527b9b1270fd37b7e9a7285cf83b6951452d
 
 # ---- deps: install once, reused by the build stage ----
-FROM node:24-slim AS deps
+FROM ${NODE_IMAGE} AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
 # ---- build: prisma generate + next build (output: 'standalone') ----
-FROM node:24-slim AS build
+FROM ${NODE_IMAGE} AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -28,7 +36,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # ---- runtime: minimal image that actually serves traffic ----
-FROM node:24-slim AS runner
+FROM ${NODE_IMAGE} AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 # sharp needs a bounded glibc allocator or memory creeps under sustained
