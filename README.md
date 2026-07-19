@@ -227,7 +227,8 @@ rebuild on change — recorded for later phases per design D13).
 ### 4. Cloudflare DNS
 
 1. Add an **A record**: `rodak` (or the exact `STAGING_HOST` subdomain) →
-   the netcup VPS public IP (`159.195.17.216`).
+   the netcup VPS public IP (take it from the netcup control panel or the
+   Coolify server settings — not committed here since this repo is public).
 2. **Gray cloud (DNS only) initially**, not orange — this lets Traefik's
    Let's Encrypt HTTP-01/TLS-ALPN challenge reach the origin directly for
    first-issuance. Switch to orange-cloud proxying (and Cloudflare SSL mode
@@ -256,7 +257,7 @@ migration, including the very first deploy ever on an empty database.
 - [ ] The response body contains the seeded product names (confirms the DB
       connection, migrations, and seed all worked end-to-end).
 - [ ] An external port scan of the server's public IP (`nmap -p 5432
-      159.195.17.216` or equivalent `ss`/`nc` check run from outside the
+      <VPS_PUBLIC_IP>` or equivalent `ss`/`nc` check run from outside the
       VPS) shows **5432 NOT reachable** — only 22/80/443 (+ the Coolify
       dashboard port until closed) should answer. This proves the Postgres
       resource from step 2 is internal-network-only, per the "Database
