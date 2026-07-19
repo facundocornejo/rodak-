@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-
-const siteUrl = process.env.STAGING_HOST
-  ? `https://${process.env.STAGING_HOST}`
-  : "http://localhost:3000";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "Rodak",
     template: "%s | Rodak",
