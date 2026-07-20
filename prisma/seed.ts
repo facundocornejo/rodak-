@@ -61,7 +61,7 @@ const SEED_PRODUCTS: SeedProduct[] = [
     name: "Cajonera Kendall",
     categorySlug: "cajoneras",
     categoryName: "Cajoneras",
-    variant: { sku: "RODAK-CAJONERA-KENDALL", priceCents: 38990000, stock: 5 },
+    variant: { sku: "RODAK-CAJONERA-KENDALL", priceCents: 48784800, stock: 5 },
   },
   {
     slug: "soporte-auricular",

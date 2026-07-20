@@ -8,7 +8,7 @@ const NBSP = String.fromCharCode(0xa0);
 
 describe("formatPriceCents", () => {
   it("formats a seeded price (Cajonera Kendall) as es-AR currency", () => {
-    expect(formatPriceCents(38990000)).toBe(`$${NBSP}389.900`);
+    expect(formatPriceCents(48784800)).toBe(`$${NBSP}487.848`);
   });
 
   it("formats a high-ticket price (Escritorio Brent Paraiso) without decimals", () => {
