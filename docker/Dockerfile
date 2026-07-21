@@ -85,6 +85,13 @@ RUN install -d -o node -g node /app/.next/cache
 
 USER node
 EXPOSE 3000
+# Next's standalone server.js binds to $HOSTNAME when set, and Docker always
+# sets HOSTNAME to the container ID — so the server listened only on the
+# container's own IP and Coolify's healthcheck against localhost:3000 was
+# refused even though the app was fully up (verified live: deploy log
+# printed "Local: http://76c0e6f65d86:3000" instead of localhost). Bind to
+# all interfaces, exactly as Next's official Docker example does.
+ENV HOSTNAME=0.0.0.0
 
 # Order matters (see README "Detecting schema drift" / task 2.13 — verified
 # live): `migrate deploy` MUST run before `db:check-drift`, never after.
