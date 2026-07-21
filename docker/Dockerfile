@@ -44,12 +44,14 @@ ENV NODE_ENV=production
 # memory-allocator note: https://sharp.pixelplumbing.com/install#linux-memory-allocator).
 ENV MALLOC_ARENA_MAX=2
 
-# Coolify's healthcheck runs curl INSIDE the container. Next's standalone
-# runtime image does not ship curl by default — without this, deploys fail
-# their healthcheck even though the app itself works fine (design D6 risk
+# Coolify's healthcheck runs INSIDE the container and needs curl or wget
+# there; Next's standalone runtime image ships neither. Current Coolify
+# (verified live, deploy log 2026-07-21: "/bin/sh: 1: wget: not found")
+# generates the check with wget, older versions used curl — install both so
+# a Coolify upgrade can't flip the deploy back to unhealthy (design D6 risk
 # register: "Healthcheck gotcha").
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends curl \
+  && apt-get install -y --no-install-recommends curl wget \
   && rm -rf /var/lib/apt/lists/*
 
 # The start command below runs `npx prisma migrate deploy` and
