@@ -58,15 +58,26 @@ RUN apt-get update \
 # Next's standalone output (it only bundles what server.js actually imports
 # at runtime, i.e. @prisma/client + @prisma/adapter-pg, not the CLI). Copy
 # the full node_modules from the build stage so the CLI is present.
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/package.json ./package.json
-COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/prisma.config.ts ./prisma.config.ts
+# --chown=node:node on every runtime COPY: the container runs as USER node,
+# but COPY defaults to root:root ownership. Prisma's CLI writes its schema
+# engine into node_modules/@prisma/engines at `migrate deploy` time, and
+# Next writes the image-optimizer cache under .next/cache — both fail with
+# EACCES against root-owned files (verified live: first Coolify deploy
+# crash-looped on exactly this).
+COPY --from=build --chown=node:node /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/package.json ./package.json
+COPY --from=build --chown=node:node /app/prisma ./prisma
+COPY --from=build --chown=node:node /app/prisma.config.ts ./prisma.config.ts
 
 # Next's standalone server: self-contained server.js plus its own minimal
 # traced node_modules subset, layered on top of the full copy above.
-COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/.next/static ./.next/static
+COPY --from=build --chown=node:node /app/.next/standalone ./
+COPY --from=build --chown=node:node /app/.next/static ./.next/static
+
+# Pre-create the image-optimizer cache dir owned by node: the Coolify volume
+# mounts here, and a mount point auto-created by Docker would be root-owned,
+# leaving the runtime user unable to write cached AVIF/WebP transforms.
+RUN install -d -o node -g node /app/.next/cache
 # No src/app static assets exist yet in Fase 0 (no public/ directory). Add
 # `COPY --from=build /app/public ./public` here once one is introduced.
 

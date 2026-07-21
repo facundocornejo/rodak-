@@ -3,6 +3,18 @@
 Patrones aprendidos de correcciones y errores en este proyecto. Leer al
 arrancar sesión.
 
+## 2026-07-20 — Si Facu pidió un documento para hacerlo ÉL, el documento ES la delegación
+
+**Qué salió mal**: Facu pidió el paso a paso de deploy en un archivo para
+ejecutarlo él; ante su "segui!" se le ofreció igual manejar su Chrome para
+hacerlo por él. Corrección textual: "eso me hiciste el documento, para que
+yo lo haga".
+
+**Regla**: cuando Facu pide una guía/checklist para operar él mismo, el rol
+de Claude queda fijado en verificar y destrabar, no en retomar la ejecución.
+"Seguí" en ese contexto = esperar su avance y verificar, no buscar otra vía
+para ejecutarlo.
+
 ## 2026-07-20 — El gate NUNCA se encadena con `&&` a través de un pipe
 
 **Qué salió mal**: `gentle-ai review validate --gate pre-push | head -8 && git push`
