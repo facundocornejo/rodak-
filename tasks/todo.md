@@ -1,8 +1,10 @@
 # TODO — Rodak (Fase 0: cierre de infra)
 
-Estado: código completo (PRs #1–#7 mergeados, main `9ec44d6`). Coolify YA
+Estado: código completo (PRs #1–#9 mergeados, main `2777858`). Coolify YA
 instalado y sano en el VPS (verificado por SSH 2026-07-20). Falta la infra
-de la app. Runbook completo: README §Deployment.
+de la app. **Guía operativa paso a paso: `DEPLOY-PASO-A-PASO.md` (raíz)** —
+la ejecuta Facu en Cloudflare/Coolify y Claude verifica cada paso.
+PRÓXIMO PASO al retomar: Paso 1 (registro A `rodak`, nube gris).
 
 ## Infra staging (requiere a Facu — Cloudflare + dashboard Coolify)
 
