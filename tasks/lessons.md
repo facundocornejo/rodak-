@@ -3,6 +3,26 @@
 Patrones aprendidos de correcciones y errores en este proyecto. Leer al
 arrancar sesión.
 
+## 2026-07-21 — El primer error visible del healthcheck no era la causa raíz
+
+**Qué salió mal**: el primer deploy falló con "wget: not found" y se arregló
+instalando wget (PR #11) — pero el healthcheck siguió fallando. La causa
+real era otra: Next standalone se bindea a `$HOSTNAME` (Docker la setea al
+container ID) y el server nunca escuchó en localhost; el wget faltante era
+el *fallback* del comando de Coolify (`curl || wget || exit 1`) — curl ya
+venía fallando en silencio. La pista estaba impresa desde el primer log:
+`Local: http://76c0e6f65d86:3000` en vez de `localhost`. Costó un ciclo
+entero de PR+deploy de más.
+
+**Regla**: cuando un healthcheck falla contra una app que loggea "Ready",
+verificar PRIMERO dónde escucha el server (la línea `Local:` de Next lo
+dice) y reconstruir el comando exacto del probe antes de patchear la
+herramienta que aparece en el error. En Docker+Next standalone:
+`ENV HOSTNAME=0.0.0.0` siempre (está en el Dockerfile de ejemplo oficial).
+Bonus del mismo ciclo: un volumen nombrado ya creado NO re-copia ownership
+de la imagen — recrearlo con OTRO nombre; y `COPY --from` sin `--chown` es
+root:root aunque el contenedor corra como `node`.
+
 ## 2026-07-20 — Si Facu pidió un documento para hacerlo ÉL, el documento ES la delegación
 
 **Qué salió mal**: Facu pidió el paso a paso de deploy en un archivo para
