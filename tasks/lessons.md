@@ -3,6 +3,52 @@
 Patrones aprendidos de correcciones y errores en este proyecto. Leer al
 arrancar sesión.
 
+## 2026-07-22 — Un número salido de un resumen no es un dato verificado
+
+**Qué salió mal**: la exploración reportó "~111 productos" leyendo el sitemap
+con WebFetch, que resume con un modelo chico. El número era falso (son 88).
+Se propagó al proposal, al spec, al hito del PLAN-MAESTRO y a cuatro PRs,
+hasta que la corrida real contra la API lo desmintió. Encima el "89" original
+del PLAN-MAESTRO —que estaba bien— se corrigió a un valor peor.
+
+**Regla**: un número que sale de una lectura resumida (WebFetch, el resumen de
+un subagente, un preview truncado) es una estimación, no un dato. Antes de
+escribirlo en docs, specs o criterios de aceptación, verificarlo contra una
+fuente que devuelva el valor crudo: un header (`X-WP-Total`), un `grep -c`, un
+`count(*)`. Si no se puede verificar todavía, escribirlo como estimación
+explícita ("~111, sin verificar") para que nadie lo tome como hito.
+
+## 2026-07-22 — Los CRITICAL se escondían donde el comentario prometía más que el código
+
+**Qué salió mal**: los tres CRITICAL de la Fase 1 eran el mismo patrón. El
+docstring de `resolveSalePriceCents` decía que la oferta queda "estrictamente
+por debajo" del precio regular, pero el código solo comparaba igualdad. El de
+`transformProduct` afirmaba que todo producto termina con al menos una
+variante con precio, pero el camino de producto variable sin variaciones
+devolvía cero. El de `import.ts` se declaraba "re-runnable by design", pero el
+upsert por slug rompía la idempotencia al primer renombrado en el origen.
+
+**Regla**: al revisar, tratar cada docstring que afirme una garantía como una
+aserción a falsear, no como contexto. Si el comentario dice "siempre",
+"nunca", "estrictamente" o "por diseño", buscar el camino que lo contradiga
+antes de leer nada más. Un comentario aspiracional es peor que ninguno: hace
+que el reviewer siguiente asuma la garantía en vez de verificarla.
+
+## 2026-07-22 — `gentle-ai review start` barre los untracked ajenos al scope
+
+**Qué salió mal**: un cambio docs-only de 45 líneas en `tasks/todo.md` dio
+`risk_level: high` con los cuatro lentes 4R. La causa: un
+`.claude/hooks/block-middleware.sh` sin trackear (de Facu, ajeno al cambio)
+entró al scope como "intended-untracked" y, al ser un script de shell,
+disparó el heurístico de integración con procesos. `--committed-only` no lo
+excluye pese a lo que dicen los docs.
+
+**Regla**: usar `--projection staged` cuando haya cualquier cosa sin commitear
+en el árbol, y verificar el scope real antes de finalizar:
+`.git/gentle-ai/review-transactions/v2/<lineage>/review-state.json` →
+`state.initial_snapshot.paths`. Corolario general: si el nivel de riesgo
+sorprende para el tamaño del cambio, sospechar del scope antes que del cambio.
+
 ## 2026-07-21 — El primer error visible del healthcheck no era la causa raíz
 
 **Qué salió mal**: el primer deploy falló con "wget: not found" y se arregló
