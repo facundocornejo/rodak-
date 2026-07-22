@@ -31,6 +31,20 @@ interface PagedResult<T> {
   totalPages: number;
 }
 
+/**
+ * What a product's `variations` array actually contains in the Store API: an id
+ * and the attribute values, with NO prices and NO stock. The priced payload
+ * lives at `/products/{variationId}` — where, in turn, `attributes` comes back
+ * empty. Neither half is enough on its own, so the export merges them.
+ */
+interface VariationStub {
+  id: number;
+  attributes: RawAttribute[];
+}
+
+/** The product as the API returns it, before `variations` is filled in. */
+type RawProductPayload = Omit<RawProduct, "variations"> & { variations: VariationStub[] };
+
 function sleep(ms: number): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
@@ -140,7 +154,7 @@ function pickAttributes(attributes: RawAttribute[] | undefined): RawAttribute[] 
   }));
 }
 
-function pickProduct(product: RawProduct): RawProduct {
+function pickProduct(product: RawProductPayload): RawProduct {
   const context = `Product ${String(product.id)} (${String(product.slug)})`;
   if (typeof product.id !== "number" || typeof product.slug !== "string" || product.slug === "") {
     throw new Error(`${context}: missing "id" or "slug" in the Store API response.`);
@@ -175,21 +189,63 @@ function pickProduct(product: RawProduct): RawProduct {
   };
 }
 
-function pickVariation(variation: RawVariation, productSlug: string): RawVariation {
-  const context = `Variation ${String(variation.id)} of ${productSlug}`;
-  if (typeof variation.id !== "number") {
-    throw new Error(`${context}: missing "id" in the Store API response.`);
+/**
+ * Fetches one variation's priced payload and merges it with the attribute values
+ * the parent product carries.
+ *
+ * The Store API has no `/products/{id}/variations` collection (it answers 404).
+ * A variation is addressable as a product of `type: "variation"`, which is where
+ * its prices, sku and stock live — but its own `attributes` array comes back
+ * empty, so the material/size values can only come from the parent's stub.
+ */
+async function fetchVariation(stub: VariationStub, product: RawProduct): Promise<RawVariation> {
+  const context = `Variation ${String(stub.id)} of ${product.slug}`;
+  const url = `${API_BASE}/products/${String(stub.id)}`;
+
+  // Retry exhaustion is the likeliest failure across hundreds of sequential
+  // requests, and fetchWithRetry only knows the URL. Naming the product here is
+  // the difference between "something timed out" and a row to go look at.
+  let response: Response;
+  try {
+    response = await fetchWithRetry(url);
+  } catch (error: unknown) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`${context}: ${detail}`, { cause: error });
   }
+
+  const body: unknown = await response.json();
+
+  if (typeof body !== "object" || body === null) {
+    throw new Error(`${context}: expected a JSON object from ${url}.`);
+  }
+
+  const variation = body as RawVariation & { parent?: number };
   if (typeof variation.is_in_stock !== "boolean") {
     throw new Error(`${context}: missing "is_in_stock" — availability must never be guessed.`);
   }
+  // Guards against a renumbered or recycled id silently attaching another
+  // product's price to this one. A missing `parent` is itself a failure: an
+  // optional check that no-ops when the field is absent is not a guard, and
+  // this is the only thing standing between a wrong id and a wrong price.
+  if (typeof variation.parent !== "number") {
+    throw new Error(
+      `${context}: the API response has no numeric "parent", so the variation cannot be tied ` +
+        "back to its product. Refusing to guess.",
+    );
+  }
+  if (variation.parent !== product.id) {
+    throw new Error(
+      `${context}: the API reports parent ${String(variation.parent)}, expected ${String(product.id)}.`,
+    );
+  }
 
   return {
-    id: variation.id,
+    id: stub.id,
     sku: variation.sku ?? "",
     prices: assertPricesShape(variation.prices, context),
     is_in_stock: variation.is_in_stock,
-    attributes: pickAttributes(variation.attributes),
+    // From the parent: the variation's own attributes array is empty.
+    attributes: pickAttributes(stub.attributes),
   };
 }
 
@@ -266,30 +322,43 @@ async function main(): Promise<void> {
   console.log(`Exporting catalog from ${API_BASE}`);
 
   const listUrl = `${API_BASE}/products?per_page=${String(PER_PAGE)}`;
-  const { items, total, totalPages } = await fetchAllPages<RawProduct>(listUrl);
+  const { items, total, totalPages } = await fetchAllPages<RawProductPayload>(listUrl);
   console.log(`Product list: ${String(items.length)} item(s) over ${String(totalPages)} page(s).`);
 
   const products = items.map(pickProduct);
+  const variationCount = items.reduce((sum, item) => sum + (item.variations.length || 0), 0);
+  console.log(`Fetching ${String(variationCount)} variation(s), one request each.`);
 
-  for (const product of products) {
+  for (const [index, product] of products.entries()) {
     if (product.type !== "variable") {
       product.variations = [];
       continue;
     }
-    const variationsUrl = `${API_BASE}/products/${String(product.id)}/variations?per_page=${String(PER_PAGE)}`;
-    const { items: variations, total: variationsTotal } = await fetchAllPages<RawVariation>(variationsUrl);
 
-    // Same completeness rule as the product list: the origin can blank a page for
-    // this endpoint too, and a variable product silently missing variations would
-    // reach the database as a product with fewer prices than it really has.
-    if (variations.length !== variationsTotal) {
+    const stubs = items[index].variations;
+    if (stubs.length === 0) {
       throw new Error(
-        `Incomplete fetch for ${product.slug}: got ${String(variations.length)} variation(s) but ` +
-          `X-WP-Total reports ${String(variationsTotal)}. Refusing to write a partial snapshot.`,
+        `Variable product ${product.slug} lists no variations: it has no price to import. ` +
+          "Fix the product at the origin, or exclude it deliberately.",
       );
     }
 
-    product.variations = variations.map((variation) => pickVariation(variation, product.slug));
+    const variations: RawVariation[] = [];
+    for (const stub of stubs) {
+      variations.push(await fetchVariation(stub, product));
+    }
+
+    // Same completeness rule as the product list: every variation the parent
+    // announced must be present, or the product reaches the database with fewer
+    // prices than it really offers.
+    if (variations.length !== stubs.length) {
+      throw new Error(
+        `Incomplete fetch for ${product.slug}: got ${String(variations.length)} variation(s) but the ` +
+          `product announces ${String(stubs.length)}. Refusing to write a partial snapshot.`,
+      );
+    }
+
+    product.variations = variations;
     console.log(`  ${product.slug}: ${String(product.variations.length)} variation(s).`);
   }
 

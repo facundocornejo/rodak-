@@ -11,7 +11,7 @@
 **¿Es viable? Sí — con una salvedad de alcance.**
 
 Lo que juega a favor:
-- Rodak **ya tiene el catálogo completo** (~111 productos: muebles Y accesorios), fotografiado, con precios y descripciones. No hay que crear productos, hay que **re-modelarlos**.
+- Rodak **ya tiene el catálogo completo** (88 productos: muebles Y accesorios), fotografiado, con precios y descripciones. No hay que crear productos, hay que **re-modelarlos**.
 - Rodak **ya tiene la marca** definida (identidad dark/dorado, tono, propuesta "diseñá tu setup"). No hay rediseño de branding.
 - Rodak **ya tiene Mercado Pago funcionando** y clientes reales. No se arranca de cero comercialmente.
 - El "clon de balolo" no es replicar productos alemanes — es replicar **una mecánica de venta** (bundles modulares + cross-sell curado) que encaja perfecto con lo que Rodak ya vende.
@@ -70,10 +70,10 @@ Cada fase es un cambio SDD independiente (`/sdd-new`), entregable y verificable.
 - **Hito verificable:** app corriendo en el VPS con HTTPS y una página que lista productos de la DB.
 
 ### Fase 1 — Migración de catálogo (~15–25 h)
-- Exportar los ~111 productos + imágenes + categorías desde WooCommerce (REST API / CSV).
+- Exportar los 88 productos + imágenes + categorías desde WooCommerce (REST API / CSV).
 - Script de transformación al modelo nuevo (variantes por material y medida, precios en centavos).
 - **Preservar slugs** para los redirects.
-- **Hito verificable:** los ~111 productos visibles en la tienda nueva con sus fotos, precios y categorías, contados 1:1 contra el catálogo actual.
+- **Hito verificable:** los 88 productos visibles en la tienda nueva con sus fotos, precios y categorías, contados 1:1 contra el catálogo actual.
 
 ### Fase 2 — Catálogo y PDP rico (~25–35 h)
 - Home, grilla de categoría, búsqueda, PDP con galería, selector de material/medida (swatches), tabs (Descripción/Specs/Envío/Reviews).
