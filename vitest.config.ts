@@ -4,7 +4,9 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts"],
+    // `scripts/` holds the catalog migration pipeline; its pure transform layer
+    // is unit-tested and must run in the same `npm test` gate as the app code.
+    include: ["src/**/*.test.ts", "scripts/**/*.test.ts"],
   },
   resolve: {
     alias: {
