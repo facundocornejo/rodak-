@@ -1,0 +1,181 @@
+{
+  "fetchedAt": "2026-07-22T12:00:00.000Z",
+  "source": "https://rodak.ar/wp-json/wc/store/v1",
+  "counts": {
+    "xWpTotal": 4,
+    "sitemap": 4,
+    "products": 4
+  },
+  "sitemapSlugs": [
+    "escritorio-vancouver-paraiso",
+    "soporte-celular-rodak",
+    "mesa-ratona-brooklyn",
+    "banco-quincho-nordelta"
+  ],
+  "products": [
+    {
+      "id": 4100,
+      "name": "Escritorio Vancouver Paraíso",
+      "slug": "escritorio-vancouver-paraiso",
+      "permalink": "https://rodak.ar/producto/escritorio-vancouver-paraiso/",
+      "sku": "",
+      "type": "variable",
+      "description": "<p>Escritorio de madera maciza de paraíso con estructura de hierro.</p><p>Fabricación artesanal &amp; terminación al agua.</p>",
+      "prices": {
+        "currency_minor_unit": 2,
+        "price": "111271300",
+        "regular_price": "111271300",
+        "sale_price": "",
+        "on_sale": false
+      },
+      "is_in_stock": true,
+      "images": [
+        {
+          "src": "https://rodak.ar/wp-content/uploads/2025/03/escritorio-vancouver-paraiso-1.jpg",
+          "alt": "Escritorio Vancouver Paraíso de frente"
+        },
+        {
+          "src": "https://rodak.ar/wp-content/uploads/2025/03/escritorio-vancouver-paraiso-2.jpg",
+          "alt": ""
+        }
+      ],
+      "categories": [
+        { "id": 21, "name": "Muebles", "slug": "muebles" },
+        { "id": 34, "name": "Escritorios", "slug": "escritorios" }
+      ],
+      "attributes": [
+        { "name": "Material", "terms": [{ "name": "Paraíso" }] },
+        { "name": "Medida", "terms": [{ "name": "120 cm" }, { "name": "140 cm" }, { "name": "160 cm" }] }
+      ],
+      "variations": [
+        {
+          "id": 4101,
+          "sku": "ESC-VAN-PAR-120",
+          "prices": {
+            "currency_minor_unit": 2,
+            "price": "111271300",
+            "regular_price": "111271300",
+            "sale_price": "",
+            "on_sale": false
+          },
+          "is_in_stock": true,
+          "attributes": [
+            { "name": "Material", "value": "Paraíso" },
+            { "name": "Medida", "value": "120 cm" }
+          ]
+        },
+        {
+          "id": 4102,
+          "sku": "",
+          "prices": {
+            "currency_minor_unit": 2,
+            "price": "128500000",
+            "regular_price": "128500000",
+            "sale_price": "",
+            "on_sale": false
+          },
+          "is_in_stock": false,
+          "attributes": [
+            { "name": "Material", "value": "Paraíso" },
+            { "name": "Medida", "value": "140 cm" }
+          ]
+        },
+        {
+          "id": 4103,
+          "sku": "  ESC-VAN-PAR-160  ",
+          "prices": {
+            "currency_minor_unit": 2,
+            "price": "123250000",
+            "regular_price": "145000000",
+            "sale_price": "123250000",
+            "on_sale": true
+          },
+          "is_in_stock": true,
+          "attributes": [
+            { "name": "Material", "value": "Paraíso" },
+            { "name": "Medida", "value": "160 cm" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3820,
+      "name": "Soporte Celular Rodak",
+      "slug": "soporte-celular-rodak",
+      "permalink": "https://rodak.ar/producto/soporte-celular-rodak/",
+      "sku": "SOP-CEL-001",
+      "type": "simple",
+      "description": "<p>Soporte de celular en madera maciza &#8211; ideal para escritorio &amp; home office.</p>\n<p>Medidas:&nbsp;10&nbsp;x&nbsp;8&nbsp;cm.</p>",
+      "prices": {
+        "currency_minor_unit": 2,
+        "price": "613500",
+        "regular_price": "613500",
+        "sale_price": "",
+        "on_sale": false
+      },
+      "is_in_stock": true,
+      "images": [
+        {
+          "src": "https://rodak.ar/wp-content/uploads/2024/11/soporte-celular-rodak.jpg",
+          "alt": "Soporte de celular Rodak"
+        }
+      ],
+      "categories": [{ "id": 47, "name": "Anexos de escritorios", "slug": "anexos-de-escritorios" }],
+      "attributes": [],
+      "variations": []
+    },
+    {
+      "id": 3915,
+      "name": "Mesa Ratona Brooklyn",
+      "slug": "mesa-ratona-brooklyn",
+      "permalink": "https://rodak.ar/producto/mesa-ratona-brooklyn/",
+      "sku": "",
+      "type": "simple",
+      "description": "<p>Mesa ratona con tapa de guatambú.</p>",
+      "prices": {
+        "currency_minor_unit": 2,
+        "price": "38250000",
+        "regular_price": "45000000",
+        "sale_price": "38250000",
+        "on_sale": true
+      },
+      "is_in_stock": true,
+      "images": [
+        {
+          "src": "https://rodak.ar/wp-content/uploads/2025/01/mesa-ratona-brooklyn.jpg",
+          "alt": "Mesa ratona Brooklyn"
+        }
+      ],
+      "categories": [
+        { "id": 21, "name": "Muebles", "slug": "muebles" },
+        { "id": 58, "name": "Mesas ratonas", "slug": "mesas-ratonas" }
+      ],
+      "attributes": [],
+      "variations": []
+    },
+    {
+      "id": 4210,
+      "name": "Banco Quincho Nordelta",
+      "slug": "banco-quincho-nordelta",
+      "permalink": "https://rodak.ar/producto/banco-quincho-nordelta/",
+      "sku": "",
+      "type": "simple",
+      "description": "<div><p>Banco de quincho <strong>Nordelta</strong>.</p><ul><li>Madera de paraíso</li><li>Terminación al agua</li></ul><p>Usar la etiqueta &lt;strong&gt; no rompe el texto.<br />Consultar por env&#237;o.</p></div>",
+      "prices": {
+        "currency_minor_unit": 2,
+        "price": "27400000",
+        "regular_price": "27400000",
+        "sale_price": "",
+        "on_sale": false
+      },
+      "is_in_stock": false,
+      "images": [],
+      "categories": [{ "id": 62, "name": "Quincho / Terraza", "slug": "quincho-terraza" }],
+      "attributes": [
+        { "name": "Material", "value": "Paraíso" },
+        { "name": "Medida", "value": "90 x 35 cm" }
+      ],
+      "variations": []
+    }
+  ]
+}
