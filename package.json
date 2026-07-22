@@ -12,7 +12,9 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:check-drift": "prisma migrate diff --from-config-datasource --to-schema=prisma/schema.prisma --exit-code"
+    "db:check-drift": "prisma migrate diff --from-config-datasource --to-schema=prisma/schema.prisma --exit-code",
+    "catalog:export": "tsx scripts/catalog/export.ts",
+    "catalog:import": "tsx scripts/catalog/import.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
