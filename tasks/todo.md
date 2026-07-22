@@ -1,23 +1,14 @@
 # TODO — Rodak
 
-**FASE 0 CERRADA (2026-07-21).** Staging vivo y verificado:
-https://rodak.fromdevdiego.com (200 TLS válido, 6 productos del seed, 5432
-aislado, robots noindex). Archive report en engram
-(`sdd/fase-0-fundaciones/archive-report`, obs #526). Deploy necesitó 3
-fixes de Dockerfile: PR #10 (chown node), #11 (wget healthcheck),
-#12 (`HOSTNAME=0.0.0.0`) — detalle en `tasks/lessons.md`.
+**Fases 0 y 1 CERRADAS Y ARCHIVADAS.** Staging vivo con el catálogo real:
+https://rodak.fromdevdiego.com sirve 93 items (88 productos reales + 5
+placeholders del seed), 277 variantes, 21 categorías, 317 imágenes, robots en
+`Disallow: /`. Archive reports en engram: Fase 0 obs #526, Fase 1 obs #557
+(verify obs #556: 12 PASS + 1 con desviación autorizada + 0 FAIL).
 
-**FASE 1 — PIPELINE COMPLETO Y VERIFICADO (2026-07-22).** PRs #15 (schema),
-#16 (export), #17 (transform) mergeados; PR#4 cierra el import. Corrida real
-contra rodak.ar + Postgres local: **88 productos** (X-WP-Total 88 = sitemap
-88; el "~111" de la exploración era erróneo, salía de un resumen de WebFetch),
-277 variantes, 21 categorías, 317 imágenes. Idempotencia probada: segunda
-corrida 0 created / 88 updated con conteos idénticos. Planning en engram:
-explore #533, proposal #535, spec #537, design #538 (rev 2), tasks #540.
-
-PRÓXIMO PASO: cargar el catálogo en **staging** (correr export + import
-contra el Postgres de Coolify) para cumplir el hito "88 productos visibles
-en rodak.fromdevdiego.com". Después `sdd-verify` y `sdd-archive`.
+**PRÓXIMO PASO: Fase 2 — catálogo y PDP rico** (home, grilla de categoría,
+búsqueda, PDP con galería, selector de material/medida, tabs). Arrancar con
+`sdd-new fase-2-pdp`.
 
 ## Pendientes que arrastra la Fase 1
 
@@ -48,7 +39,19 @@ en rodak.fromdevdiego.com". Después `sdd-verify` y `sdd-archive`.
 
 ## Archivado (hecho)
 
-- Fase 0 completa: PRs #1–#9 (código, CI, docs) + #10–#12 (fixes de deploy).
-  Infra Coolify: GitHub App, Postgres 18 interno, Application Dockerfile,
-  healthcheck, volumen `rodak-next-cache-v2`, limits 2g/2cpu, envs en UI.
-  Seed corrido (6 productos). Verificación externa Paso 8 con evidencia.
+- **Fase 0** — PRs #1–#9 (código, CI, docs) + #10–#12 (fixes de deploy: chown
+  node, wget healthcheck, `HOSTNAME=0.0.0.0`; lecciones en `tasks/lessons.md`).
+  Infra Coolify: GitHub App, Postgres 18 interno, Dockerfile, healthcheck,
+  volumen `rodak-next-cache-v2`, limits 2g/2cpu, envs en UI.
+- **Fase 1** — PRs #15 (schema aditivo), #16 (export), #17 (transform + tests),
+  #18 (import + gate de corrida real). El catálogo tiene **88 productos**, no
+  ~111 (ese número salía de un resumen de WebFetch; verificado por X-WP-Total,
+  sitemap y el fetch real). Idempotencia probada en local y staging.
+  La review 4R atajó tres CRITICAL que los tests no habrían encontrado: oferta
+  más cara que el precio regular guardada como descuento, producto variable sin
+  ninguna variante con precio, y renombrar un producto en Woo (cambia el slug
+  pero no el `wooId`, que es `@unique`) rompiendo la idempotencia para siempre.
+  Para recargar staging: túnel SSH `-L 15432:10.0.1.7:5432` al VPS (10.0.1.7 =
+  contenedor `hwnfzqbj5e9k574g2r2r1a1q` en la red `coolify`), la `DATABASE_URL`
+  sale del contenedor de la app vía `docker inspect` y se reescribe al puerto
+  del túnel — nunca a disco.
