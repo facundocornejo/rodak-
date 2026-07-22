@@ -34,3 +34,6 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Catalog import snapshot (local artifact, never committed — see design D6)
+data/

@@ -32,6 +32,9 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 1080, 1920],
     imageSizes: [64, 128, 256],
+    remotePatterns: [
+      { protocol: "https", hostname: "rodak.ar", pathname: "/wp-content/uploads/**" },
+    ],
   },
   async headers() {
     return [

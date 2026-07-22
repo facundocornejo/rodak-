@@ -20,6 +20,10 @@ model Product {
   slug        String   @unique
   name        String
   description String?
+  // wooId: immutable WooCommerce Store API integer PK, set on every import.
+  // Nullable to accommodate pre-import rows; provenance/future-diffing only
+  // — `slug` remains the upsert key, never `wooId`.
+  wooId       Int?     @unique
 
   categories Category[]
   variants   ProductVariant[]
@@ -35,11 +39,27 @@ model ProductVariant {
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  sku        String  @unique
-  material   String?
-  sizeMm     String?
-  priceCents Int
-  stock      Int     @default(0)
+  sku            String  @unique
+  material       String?
+  sizeMm         String?
+  priceCents     Int
+  // salePriceCents: promotional price in integer cents, set iff the source
+  // product/variant is on_sale (see design D5). Null = not on sale.
+  salePriceCents Int?
+  // stock: on-hand quantity. No Fase-1 data source (the public WooCommerce
+  // Store API exposes no quantities); the catalog import NEVER writes this
+  // column. 0 = unknown/unmanaged quantity, NOT "zero available". Read
+  // `inStock` for customer-facing availability — never infer it from `stock`.
+  stock          Int     @default(0)
+  // inStock: customer-facing availability sourced verbatim from the Store
+  // API `is_in_stock` field. The ONLY authoritative availability signal —
+  // the import ALWAYS sets this explicitly, never inferred from `stock`.
+  inStock        Boolean @default(false)
+  // wooId: immutable WooCommerce Store API integer PK (variation id, or the
+  // product id for a synthesized simple-product variant). Nullable to
+  // accommodate pre-import rows; provenance/future-diffing only — `sku`
+  // remains the upsert key, never `wooId`.
+  wooId          Int?    @unique
 
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
