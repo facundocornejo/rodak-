@@ -131,24 +131,31 @@ Botón **Deploy**. Qué esperar en el log:
 3. Healthcheck en verde (le pega a `/` DESDE ADENTRO del contenedor con el
    `curl` que la imagen instala para esto).
 
-**Nota:** `/` responde 500 hasta que corra el seed — la página consulta la
-DB y propaga errores a propósito (es el healthcheck). Con la DB vacía pero
-migrada responde 200 con "Catálogo en construcción." — eso ya es éxito.
+**Nota:** `/` responde 500 mientras la DB no sea alcanzable — la página
+consulta la DB y propaga errores a propósito (es el healthcheck). Con la DB
+vacía pero migrada responde 200 con "Catálogo en construcción." — eso ya es
+éxito; los productos llegan en el paso 7 con el import, no con un seed.
 
-## Paso 7 — [Facu] Seed de staging (una sola vez)
+## Paso 7 — [Facu] Cargar el catálogo en staging (una sola vez)
 
-En Coolify → la app → **Terminal** (shell dentro del contenedor):
+> **Cambió en la Fase 1.** Este paso decía "correr el seed" y esperaba
+> `Seed complete. 6 products in the database.`. Ese seed de placeholders se
+> retiró: `prisma/seed.ts` ya no escribe productos y falla a propósito. Lo que
+> carga staging ahora es el catálogo real de rodak.ar.
+
+El import corre desde la máquina de Facu contra el Postgres de Coolify por un
+túnel SSH (el Postgres NO tiene puerto público). El procedimiento completo del
+túnel está en la memoria del proyecto; en una línea:
 
 ```bash
-npx tsx prisma/seed.ts
+ssh -f -N -o ExitOnForwardFailure=yes -L 15432:<ip-del-contenedor-postgres>:5432 root@<vps>
+DATABASE_URL="postgresql://...@127.0.0.1:15432/postgres" npm run catalog:export
+DATABASE_URL="postgresql://...@127.0.0.1:15432/postgres" npm run catalog:import
 ```
 
-Salida esperada: `Seed complete. 6 products in the database.`
-(La imagen incluye `tsx`, la carpeta `prisma/` y el `DATABASE_URL` ya está
-en el entorno del contenedor — no hace falta pasar nada.)
-
-Recargar https://rodak.fromdevdiego.com → deben verse los 6 productos con
-la Cajonera Kendall a **$ 487.848**.
+Salida esperada del import: `88 product(s)` en la línea `database` del
+resumen. Recargar https://rodak.fromdevdiego.com → 88 productos, con la
+Cajonera Kendall Paraíso a **$ 487.848**.
 
 ## Paso 8 — [Claude] Verificación final (checklist del README)
 
@@ -156,8 +163,8 @@ La corre Claude desde afuera del VPS y pega la evidencia:
 
 - [ ] `curl -sSI https://rodak.fromdevdiego.com/` → 200 con certificado
       Let's Encrypt válido (sin `-k`).
-- [ ] El body contiene los nombres del seed (DB + migraciones + seed
-      end-to-end).
+- [ ] El body contiene los nombres del catálogo importado (DB + migraciones +
+      import end-to-end).
 - [ ] Scan externo del puerto 5432 → **cerrado** (aislamiento de red de la
       DB; solo 22/80/443 responden).
 - [ ] Log del deploy muestra los 3 pasos en orden (migrate → drift-check →
