@@ -1,14 +1,28 @@
 # TODO — Rodak
 
 **Fases 0 y 1 CERRADAS Y ARCHIVADAS.** Staging vivo con el catálogo real:
-https://rodak.fromdevdiego.com sirve 93 items (88 productos reales + 5
-placeholders del seed), 277 variantes, 21 categorías, 317 imágenes, robots en
-`Disallow: /`. Archive reports en engram: Fase 0 obs #526, Fase 1 obs #557
-(verify obs #556: 12 PASS + 1 con desviación autorizada + 0 FAIL).
+https://rodak.fromdevdiego.com sirve 88 productos (placeholders del seed
+eliminados, PR #22), 272 variantes, 21 categorías, 317 imágenes, robots en
+`Disallow: /`. Archive reports en engram: Fase 0 obs #526, Fase 1 obs #557.
 
-**PRÓXIMO PASO: Fase 2 — catálogo y PDP rico** (home, grilla de categoría,
-búsqueda, PDP con galería, selector de material/medida, tabs). Arrancar con
-`sdd-new fase-2-pdp`.
+**FASE 2 (`fase-2-pdp`): PLANNING COMPLETO (24/07) — LISTA PARA APPLY.**
+Artefactos en engram: explore #591, proposal #593 (GATE 1 ✓), spec #595
+(enmendado en GATE 2: tab Specs = datos estructurados), design #596 (GATE 2 ✓,
+decisiones D0–D14), tasks #598 (52 tasks en 9 PRs stacked-to-main). Gate
+documental de trazabilidad: CLOSE. Plan y revisión externa en la raíz:
+`PLAN-FASE-2-PLANNING.md`, `CODEX-REVIEW-VEREDICTO.md`.
+
+**PRÓXIMO PASO: apply de fase-2-pdp — CON OPUS, en sesión fresca.**
+1. Facu cambia el modelo con `/model` a Opus ANTES de arrancar (decisión
+   explícita: planning Fable, ejecución Opus).
+2. `sdd-apply fase-2-pdp` — el ejecutor lee SOLO tasks #598 (+ spec/design
+   referenciados). Delivery: auto-chain, stacked-to-main, un receipt = un
+   commit. PR8 (health) ANTES del cutover manual de Coolify y ese ANTES de
+   PR9 (streaming de `/`) — orden D1b, no negociable.
+3. OJO gentle-ai: si hay archivos sueltos en la raíz (p.ej. `.agents/`,
+   `.codex/`, `AGENTS.md` de Codex) — usar `--projection staged` como manda
+   la lección del 22/07. Los docs del planning y `.env.example` ya están
+   commiteados.
 
 ## Pendientes que arrastra la Fase 1
 
@@ -28,12 +42,10 @@ búsqueda, PDP con galería, selector de material/medida, tabs). Arrancar con
       Facu: importarlas igual). La UI de Fase 2 DEBE tratar `priceCents === 0`
       como "consultar precio" — mostrarlo como precio lee "gratis". La lista
       exacta queda en `data/woo-snapshot/reconciliation-report.json`.
-- [ ] Crear `.env.example` en la raíz — **lo tiene que pegar Facu**: los hooks
-      del proyecto bloquean que el agente escriba cualquier `.env*`. Contenido
-      listo en `git show 2777858:tasks/todo.md`, sección "Contenido listo"
-      (verificado el 24/07 contra `src/lib/site-url.ts` y
-      `docker-compose.dev.yml`: `DATABASE_URL`, `STAGING_HOST`, `SITE_URL`
-      siguen siendo las variables correctas).
+- [x] **`.env.example` en la raíz**: RESUELTO (24/07) — Facu lo creó (los
+      hooks bloquean que el agente escriba `.env*`) y quedó commiteado con
+      los docs del planning de Fase 2. Variables verificadas contra
+      `src/lib/site-url.ts`, `src/lib/db.ts` y `docker-compose.dev.yml`.
 - [ ] Decisión Facu: provenance de los 5 commits de la Unidad 3; la IP
       redactada sigue en el historial git público.
 - [ ] Cuando upstream mergee el fix del issue #1329 de gentle-ai, volver al
