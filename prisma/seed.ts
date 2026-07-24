@@ -1,134 +1,32 @@
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
+// The catalog is NOT seeded any more.
+//
+// Fase 1 replaced the six hand-written placeholder products this file used to
+// write with the real WooCommerce catalog, imported by `scripts/catalog/`:
+//
+//   npm run catalog:export   # snapshot rodak.ar into data/woo-snapshot/
+//   npm run catalog:import   # upsert it into Postgres (idempotent)
+//   npm run catalog:prune    # dry run; -- --confirm deletes removed-at-origin rows
+//
+// The placeholders were not merely redundant, they were harmful: their short
+// slugs duplicated real products that arrive with a suffix (`cajonera-kendall`
+// vs `cajonera-kendall-paraiso`) — five such duplicates had to be deleted from
+// staging on 2026-07-24 — one of them collided outright with a real slug
+// (`escritorio-brent-paraiso`), and every one wrote the `stock` column, which
+// the import contract forbids: it has no Fase-1 data source and `inStock` is
+// the only authoritative availability signal (design D1).
+//
+// This file stays wired to `prisma.config.ts` on purpose. `prisma migrate
+// reset` runs the configured seed command, and failing loudly is the point:
+// it tells the operator the database is empty and which commands fill it,
+// instead of silently succeeding and leaving them to wonder why `/` renders
+// "Catálogo en construcción.".
 
-const connectionString = process.env.DATABASE_URL;
+console.error(
+  "There is no seed data for this project.\n" +
+    "The catalog comes from the real WooCommerce import, not from fixtures:\n" +
+    '  DATABASE_URL="postgresql://..." npm run catalog:export\n' +
+    '  DATABASE_URL="postgresql://..." npm run catalog:import\n' +
+    "See README § Local database.",
+);
 
-if (!connectionString) {
-  throw new Error(
-    "DATABASE_URL is not set. Pass it inline when running the seed, e.g.\n" +
-      '  DATABASE_URL="postgresql://..." npx tsx prisma/seed.ts',
-  );
-}
-
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
-
-interface SeedVariant {
-  sku: string;
-  material?: string;
-  sizeMm?: string;
-  priceCents: number;
-  stock: number;
-}
-
-interface SeedProduct {
-  slug: string;
-  name: string;
-  categorySlug: string;
-  categoryName: string;
-  variant: SeedVariant;
-}
-
-// Real Rodak catalog subset (see AUDITORIA.md and spec "Realistic Seed
-// Data"). Slugs follow the existing WooCommerce URL pattern
-// (/producto/{slug}/, see design D4), derived from each product's name.
-// Prices are integer cents, never floats (see spec "Money and Date
-// Invariants"): e.g. "Escritorio Brent Paraíso" at ARS 1.112.713 is stored
-// as 111271300.
-const SEED_PRODUCTS: SeedProduct[] = [
-  {
-    slug: "escritorio-brent-paraiso",
-    name: "Escritorio Brent Paraíso",
-    categorySlug: "escritorios",
-    categoryName: "Escritorios",
-    variant: { sku: "RODAK-ESCRITORIO-BRENT-PARAISO", priceCents: 111271300, stock: 5 },
-  },
-  {
-    slug: "escritorio-vancouver",
-    name: "Escritorio Vancouver",
-    categorySlug: "escritorios",
-    categoryName: "Escritorios",
-    variant: { sku: "RODAK-ESCRITORIO-VANCOUVER", priceCents: 52764000, stock: 5 },
-  },
-  {
-    slug: "estanteria-franklin",
-    name: "Estantería Franklin",
-    categorySlug: "estanterias",
-    categoryName: "Estanterías",
-    variant: { sku: "RODAK-ESTANTERIA-FRANKLIN", priceCents: 144972600, stock: 5 },
-  },
-  {
-    slug: "cajonera-kendall",
-    name: "Cajonera Kendall",
-    categorySlug: "cajoneras",
-    categoryName: "Cajoneras",
-    variant: { sku: "RODAK-CAJONERA-KENDALL", priceCents: 48784800, stock: 5 },
-  },
-  {
-    slug: "soporte-auricular",
-    name: "Soporte auricular",
-    categorySlug: "accesorios",
-    categoryName: "Accesorios",
-    variant: { sku: "RODAK-SOPORTE-AURICULAR", priceCents: 2911700, stock: 20 },
-  },
-  {
-    slug: "soporte-celular",
-    name: "Soporte celular",
-    categorySlug: "accesorios",
-    categoryName: "Accesorios",
-    variant: { sku: "RODAK-SOPORTE-CELULAR", priceCents: 613500, stock: 20 },
-  },
-];
-
-async function main() {
-  for (const item of SEED_PRODUCTS) {
-    const category = await prisma.category.upsert({
-      where: { slug: item.categorySlug },
-      update: { name: item.categoryName },
-      create: { slug: item.categorySlug, name: item.categoryName },
-    });
-
-    const product = await prisma.product.upsert({
-      where: { slug: item.slug },
-      update: {
-        name: item.name,
-        categories: { connect: { id: category.id } },
-      },
-      create: {
-        slug: item.slug,
-        name: item.name,
-        categories: { connect: { id: category.id } },
-      },
-    });
-
-    await prisma.productVariant.upsert({
-      where: { sku: item.variant.sku },
-      update: {
-        productId: product.id,
-        material: item.variant.material,
-        sizeMm: item.variant.sizeMm,
-        priceCents: item.variant.priceCents,
-        stock: item.variant.stock,
-      },
-      create: {
-        sku: item.variant.sku,
-        productId: product.id,
-        material: item.variant.material,
-        sizeMm: item.variant.sizeMm,
-        priceCents: item.variant.priceCents,
-        stock: item.variant.stock,
-      },
-    });
-  }
-
-  const productCount = await prisma.product.count();
-  console.log(`Seed complete. ${productCount} products in the database.`);
-}
-
-main()
-  .catch((error: unknown) => {
-    console.error(error);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+process.exitCode = 1;

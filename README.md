@@ -29,8 +29,9 @@ npm run dev
 ```
 
 Serves the app at `http://localhost:3000`. The listing page needs a running,
-migrated, seeded database — see "Local database" below before your first
-run.
+migrated database holding the imported catalog — see "Local database" below
+before your first run. (An empty-but-migrated database is not an error: the
+page renders "Catálogo en construcción.".)
 
 ## Quality checks
 
@@ -96,12 +97,18 @@ so `npm run dev` needs a reachable `DATABASE_URL`.
 
    ```bash
    DATABASE_URL="postgresql://rodak:rodak_dev_only@<host>:5434/rodak_dev" npx prisma migrate dev
-   DATABASE_URL="postgresql://rodak:rodak_dev_only@<host>:5434/rodak_dev" npx tsx prisma/seed.ts
+   DATABASE_URL="postgresql://rodak:rodak_dev_only@<host>:5434/rodak_dev" npm run catalog:export
+   DATABASE_URL="postgresql://rodak:rodak_dev_only@<host>:5434/rodak_dev" npm run catalog:import
    ```
 
-   `<host>` is `localhost` if step 2 worked, otherwise the WSL IP. The seed
-   script is idempotent (upserts by `slug`/`sku`) — running it twice does
-   not duplicate products.
+   `<host>` is `localhost` if step 2 worked, otherwise the WSL IP. There is
+   **no seed data**: the catalog is the real one, snapshotted from rodak.ar by
+   `catalog:export` (network required, writes the gitignored
+   `data/woo-snapshot/`) and written by `catalog:import`, which is idempotent
+   (upserts by `slug`/`sku`) — running it twice does not duplicate products.
+   `catalog:import` never deletes; a product that disappears upstream is
+   reported and removed only by the explicit `npm run catalog:prune`
+   (dry run by default, `-- --confirm` to write).
 
 4. `npm run dev` also needs `DATABASE_URL` in its shell for the same reason:
 
@@ -254,8 +261,8 @@ migration, including the very first deploy ever on an empty database.
 - [ ] `curl -sSI https://rodak.fromdevdiego.com/` from **outside** the VPS
       returns `200` (or the app's real status) with a valid TLS certificate
       chain (`curl -v` shows the Let's Encrypt-issued cert, no `-k` needed).
-- [ ] The response body contains the seeded product names (confirms the DB
-      connection, migrations, and seed all worked end-to-end).
+- [ ] The response body contains the imported product names (confirms the DB
+      connection, migrations, and catalog import all worked end-to-end).
 - [ ] An external port scan of the server's public IP (`nmap -p 5432
       <VPS_PUBLIC_IP>` or equivalent `ss`/`nc` check run from outside the
       VPS) shows **5432 NOT reachable** — only 22/80/443 (+ the Coolify

@@ -15,18 +15,25 @@ búsqueda, PDP con galería, selector de material/medida, tabs). Arrancar con
 - [x] **Nombres del seed**: RESUELTO — se importan los nombres exactos de
       WooCommerce con sufijo ("Vancouver Paraíso", etc.); el upsert por slug
       pisa los nombres cortos del seed.
-- [ ] **5 productos placeholder del seed quedaron huérfanos** en la DB:
-      `cajonera-kendall`, `escritorio-vancouver`, `estanteria-franklin`,
-      `soporte-auricular`, `soporte-celular`. Sus equivalentes reales tienen
-      slug con sufijo, así que ahora aparecen duplicados en la home. El import
-      los reporta pero NO los borra (regla report-only). Decisión de Facu:
-      borrarlos a mano o dejarlos.
+- [x] **5 productos placeholder del seed quedaron huérfanos**: RESUELTO
+      (24/07) — borrados de staging con `npm run catalog:prune -- --confirm`
+      (script nuevo `scripts/catalog/prune.ts`, dry-run por defecto, toma los
+      targets de `removedAtOrigin` del reconciliation report y se niega a
+      borrar cualquier slug que el snapshot todavía publique, borra por `id` y
+      deja un backup JSON de las filas en `data/woo-snapshot/pruned-*.json`).
+      Staging y DB local: 93 → 88 productos, 277 → 272 variantes, 317 imágenes
+      intactas; la home sirve 88 items y `/producto/soporte-celular/` da 404.
+      Ya no pueden resucitar: el seed de placeholders quedó retirado.
 - [ ] **7 variantes "A medida (consultar)" con `priceCents = 0`** (decisión de
       Facu: importarlas igual). La UI de Fase 2 DEBE tratar `priceCents === 0`
       como "consultar precio" — mostrarlo como precio lee "gratis". La lista
       exacta queda en `data/woo-snapshot/reconciliation-report.json`.
-- [ ] Crear `.env.example` en la raíz (lo pega Facu — contenido listo en
-      `git show 2777858:tasks/todo.md`, sección "Contenido listo").
+- [ ] Crear `.env.example` en la raíz — **lo tiene que pegar Facu**: los hooks
+      del proyecto bloquean que el agente escriba cualquier `.env*`. Contenido
+      listo en `git show 2777858:tasks/todo.md`, sección "Contenido listo"
+      (verificado el 24/07 contra `src/lib/site-url.ts` y
+      `docker-compose.dev.yml`: `DATABASE_URL`, `STAGING_HOST`, `SITE_URL`
+      siguen siendo las variables correctas).
 - [ ] Decisión Facu: provenance de los 5 commits de la Unidad 3; la IP
       redactada sigue en el historial git público.
 - [ ] Cuando upstream mergee el fix del issue #1329 de gentle-ai, volver al
