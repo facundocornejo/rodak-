@@ -11,10 +11,9 @@ import { prisma } from "@/lib/db";
 export const PRODUCT_PAGE_SIZE = 24;
 
 /**
- * Highlight tag. The `Product.tags` column does not exist yet — it ships with
- * the additive migration in PR3 — so every DTO currently reports `null`.
- * The field is part of the contract now so the card/PDP components can be
- * written against a stable shape (see design D11).
+ * Highlight tag. Owner-curated via `Product.tags` (design D11); at most one
+ * renders per card/PDP, BEST_SELLER winning over NEW when a product carries
+ * both.
  */
 export type ProductTag = "BEST_SELLER" | "NEW";
 
@@ -97,6 +96,7 @@ const mediaOrderBy: Prisma.ProductMediaOrderByWithRelationInput[] = [
 const productCardSelect = {
   slug: true,
   name: true,
+  tags: true,
   categories: singleCategorySelect,
   media: {
     select: { url: true, alt: true },
@@ -114,6 +114,7 @@ const productDetailSelect = {
   slug: true,
   name: true,
   description: true,
+  tags: true,
   categories: singleCategorySelect,
   media: {
     select: { url: true, alt: true },
@@ -189,6 +190,29 @@ function mediaAlt(alt: string | null, productName: string): string {
   return alt !== null && alt.trim() !== "" ? alt : productName;
 }
 
+/**
+ * At most one badge renders (design D11): BEST_SELLER wins over NEW when a
+ * product carries both, and an empty array (the default, no owner curation
+ * yet) maps to `null` rather than a fabricated tag.
+ *
+ * The parameter is typed nullable even though Prisma types the field as a
+ * required list. Prisma has no "optional list" in its schema language, so it
+ * generates the Postgres column as NULLABLE with a default (`"tags"
+ * "ProductTag"[] DEFAULT ARRAY[]::"ProductTag"[]`, no NOT NULL) — that is
+ * Prisma's own output, not an omission, and `db:check-drift` is green with it.
+ * Do NOT hand-add NOT NULL to the migration: it would diverge from what Prisma
+ * regenerates. A NULL can therefore reach the column through hand-run SQL, and
+ * while the driver was measured to hand such a row back as `[]`, that coercion
+ * is the driver's behaviour and not a contract we control. Tolerating it here
+ * costs one guard and removes the question entirely.
+ */
+function pickTag(tags: ProductTag[] | null | undefined): ProductTag | null {
+  if (!tags) return null;
+  if (tags.includes("BEST_SELLER")) return "BEST_SELLER";
+  if (tags.includes("NEW")) return "NEW";
+  return null;
+}
+
 function distinctMaterials(variants: { material: string | null }[]): string[] {
   const materials: string[] = [];
 
@@ -217,8 +241,7 @@ function toProductCard(row: ProductCardRow): ProductCardDTO {
     hasConsultPrice: row.variants.some((variant) => variant.priceCents === 0),
     inStock: row.variants.some((variant) => variant.inStock),
     materials: distinctMaterials(row.variants),
-    // TODO(PR3): read `row.tags` once the additive tags migration lands (D11).
-    tag: null,
+    tag: pickTag(row.tags),
   };
 }
 
@@ -240,8 +263,7 @@ function toProductDetail(row: ProductDetailRow): ProductDetailDTO {
       salePriceCents: saleOf(variant),
       inStock: variant.inStock,
     })),
-    // TODO(PR3): read `row.tags` once the additive tags migration lands (D11).
-    tag: null,
+    tag: pickTag(row.tags),
   };
 }
 
