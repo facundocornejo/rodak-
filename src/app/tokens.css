@@ -1,0 +1,120 @@
+/*
+ * Rodak design tokens — single light-editorial base.
+ *
+ * Lifted from `mockups/index.html` + `mockups/producto.html`, whose light
+ * theme block is promoted here to a bare `:root` (design D14). There is no
+ * dark base, no theme attribute and no persistence logic anywhere in `src/`:
+ * the toggle was removed, not hidden.
+ *
+ * Colour is authored in OKLCH so lightness steps are perceptually even and
+ * neutrals can be tinted toward the brand amber (hue ~70-80) instead of being
+ * flat grey.
+ *
+ * Contrast (WCAG 2.1, sRGB, computed from these exact OKLCH values):
+ *   --text        on --bg 16.12:1   --text        on --surface 15.20:1
+ *   --text-soft   on --bg  7.88:1   --text-soft   on --surface  7.43:1
+ *   --text-faint  on --bg  5.13:1   --text-faint  on --surface  4.84:1
+ *   --accent-2    on --bg  5.28:1   --accent-2    on --surface  4.98:1
+ *   --sale        on --bg  4.86:1   #fff on --sale             4.93:1
+ *   --feature-text on --feature-bg 16.85:1
+ *   --feature-accent on --feature-bg 9.58:1
+ *   --accent      on --bg  2.19:1  <-- FAILS AA: banned as text, see below.
+ *
+ * Two mockup values were corrected because the measured ratio contradicted the
+ * design's estimate: --accent-2 was oklch(0.58 0.118 66) (4.10:1 — fails AA for
+ * small text) and --text-faint was oklch(0.60 0.010 70) (3.68:1). Both were
+ * darkened, raising chroma slightly as lightness drops so the amber does not
+ * wash out to brown-grey.
+ */
+
+:root {
+  /* Light-only UI. Keeps native controls, scrollbars and form widgets light. */
+  color-scheme: light;
+
+  /* ---- surfaces & ink: warm off-white base, warm charcoal ink ------------ */
+  --bg: oklch(0.975 0.008 80);
+  --surface: oklch(0.955 0.012 80); /* cards, footer */
+  --surface-2: oklch(0.925 0.014 80); /* raised/hover surfaces — not a small-text surface */
+  --text: oklch(0.22 0.012 70); /* primary ink */
+  --text-soft: oklch(0.42 0.012 70); /* secondary copy */
+  --text-faint: oklch(0.52 0.01 70); /* tertiary micro-labels (AA on --bg and --surface) */
+  --border: oklch(0.88 0.01 80); /* hairline separators, decorative only */
+  --border-strong: oklch(0.62 0.01 70); /* >=3:1 on --bg — borders of interactive controls */
+
+  /* ---- accents ----------------------------------------------------------
+   * --accent (gold) is the brand colour but only 2.19:1 on --bg, so it is
+   * BANNED as text on light surfaces: it survives as underlines, marks, active
+   * borders and rules, and as text only inside the dark islands below.
+   * --accent-2 is the only accent allowed for text on a light surface
+   * (eyebrows, micro-labels), and it is also the focus-ring colour.
+   * Accents stay scarce on purpose (60-30-10). */
+  --accent: oklch(0.74 0.132 74);
+  --accent-2: oklch(0.52 0.128 66);
+  --sale: oklch(0.55 0.15 28);
+
+  /* ---- dark islands -----------------------------------------------------
+   * The only three dark tokens that survive the dark->light translation
+   * (D14). Used by exactly two visual islands: (a) announce bar + hero +
+   * marquee as one continuous top block, (b) the craft/about band. */
+  --feature-bg: oklch(0.2 0.012 70);
+  --feature-text: oklch(0.975 0.008 80);
+  --feature-accent: oklch(0.8 0.12 78);
+
+  /* ---- product stages (photography backdrops) --------------------------- */
+  --card-stage: radial-gradient(120% 120% at 50% 0, oklch(0.96 0.01 80), oklch(0.9 0.014 80));
+  --stage: radial-gradient(120% 120% at 50% 15%, oklch(0.97 0.008 80), oklch(0.9 0.014 80));
+
+  /* ---- spacing scale (4pt base, no two steps closer than ~25%) ---------- */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+  --space-4xl: 64px;
+  --space-5xl: 96px;
+  --space-6xl: 140px; /* section rhythm — index.html's superset wins (R9) */
+
+  /* ---- page container --------------------------------------------------- */
+  --wrap: 1240px;
+  --wrap-pad: var(--space-xl);
+
+  /* ---- type ------------------------------------------------------------
+   * --font-display / --font-body are injected on <html> by next/font/local
+   * (src/app/layout.tsx). Fluid steps: this is a marketing/content surface,
+   * so clamp() is intentional here. */
+  --family-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --family-body: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+
+  --step--1: clamp(0.82rem, 0.8rem + 0.1vw, 0.9rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.08rem);
+  --step-1: clamp(1.3rem, 1.2rem + 0.5vw, 1.6rem);
+  --step-2: clamp(1.8rem, 1.5rem + 1.4vw, 2.7rem); /* section h2, and the PDP h1 (D14) */
+  --step-3: clamp(2.6rem, 1.9rem + 3.4vw, 5rem);
+  --step-4: clamp(3.4rem, 2rem + 6.6vw, 8rem); /* hero display only — nothing else */
+
+  --lh-display: 1.05;
+  --lh-body: 1.6;
+
+  /* ---- radii (one small scale; nested radius = outer - padding) --------- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  /* ---- elevation: two layers (contact + ambient), tinted with the ink
+   * instead of pure black, single light source from above ----------------- */
+  --shadow-sm: 0 1px 2px oklch(0.22 0.012 70 / 6%), 0 2px 8px oklch(0.22 0.012 70 / 5%);
+  --shadow-md: 0 2px 4px oklch(0.22 0.012 70 / 7%), 0 12px 28px oklch(0.22 0.012 70 / 9%);
+
+  /* ---- motion ----------------------------------------------------------- */
+  --dur-fast: 0.2s;
+  --dur-mid: 0.35s;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---- focus ------------------------------------------------------------ */
+  --focus-ring: var(--accent-2);
+  --focus-width: 2px;
+  --focus-offset: 2px;
+}
