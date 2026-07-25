@@ -48,6 +48,10 @@ function productRow(overrides: Record<string, unknown> = {}): Record<string, unk
     categories: [{ name: "Mesas", slug: "mesas" }],
     media: [{ url: "https://cdn.example/mesa.jpg", alt: "Mesa Kendall de frente" }],
     variants: [variantRow()],
+    // Default: no owner-curated tag (PR3, design D11). Explicit `[]`, not
+    // omitted, so a fixture that forgets `tags` cannot silently pass by
+    // reading `undefined` as "no tag" without exercising `pickTag`.
+    tags: [],
     ...overrides,
   };
 }
@@ -308,6 +312,83 @@ describe("getProductCards", () => {
     countMock.mockRejectedValueOnce(new Error("connection refused"));
 
     await expect(getProductCards()).rejects.toThrow("connection refused");
+  });
+});
+
+describe("product tag wiring (PR3, design D11)", () => {
+  it("selects the tags column on the card query", async () => {
+    countMock.mockResolvedValueOnce(0);
+    findManyMock.mockResolvedValueOnce([]);
+
+    await getProductCards();
+
+    expect(lastFindManyArgs().select.tags).toBe(true);
+  });
+
+  it("maps a single tag through on the card DTO", async () => {
+    countMock.mockResolvedValueOnce(1);
+    findManyMock.mockResolvedValueOnce([productRow({ tags: ["NEW"] })]);
+
+    const [card] = (await getProductCards()).items;
+
+    expect(card.tag).toBe("NEW");
+  });
+
+  it("prefers BEST_SELLER over NEW when a product carries both tags", async () => {
+    countMock.mockResolvedValueOnce(1);
+    findManyMock.mockResolvedValueOnce([productRow({ tags: ["NEW", "BEST_SELLER"] })]);
+
+    const [card] = (await getProductCards()).items;
+
+    expect(card.tag).toBe("BEST_SELLER");
+  });
+
+  it("maps an empty tags array to a null tag, never a fabricated default", async () => {
+    countMock.mockResolvedValueOnce(1);
+    findManyMock.mockResolvedValueOnce([productRow({ tags: [] })]);
+
+    const [card] = (await getProductCards()).items;
+
+    expect(card.tag).toBeNull();
+  });
+
+  it("wires the tag through on the detail DTO too, same BEST_SELLER-over-NEW precedence", async () => {
+    findUniqueMock.mockResolvedValueOnce(productRow({ tags: ["BEST_SELLER", "NEW"] }));
+
+    const detail = await getProductBySlug("mesa-kendall");
+
+    expect(detail!.tag).toBe("BEST_SELLER");
+  });
+
+  it("maps an empty tags array to a null tag on the detail DTO", async () => {
+    findUniqueMock.mockResolvedValueOnce(productRow({ tags: [] }));
+
+    const detail = await getProductBySlug("mesa-kendall");
+
+    expect(detail!.tag).toBeNull();
+  });
+
+  it("selects the tags column on the detail query", async () => {
+    findUniqueMock.mockResolvedValueOnce(null);
+
+    await getProductBySlug("mesa-kendall");
+
+    expect(findUniqueMock.mock.calls.at(-1)?.[0]?.select?.tags).toBe(true);
+  });
+
+  // Prisma types `tags` as a required list, but it generates the Postgres
+  // column NULLABLE (its schema language has no optional list), so hand-run SQL
+  // can put a NULL there. The card and the PDP must degrade to "no badge"
+  // rather than throw on `.includes` of null. The cast is the point of the
+  // test: it reproduces a row the type system says cannot exist but the
+  // database allows.
+  it("degrades to no tag when the column holds NULL instead of an empty array", async () => {
+    countMock.mockResolvedValueOnce(1);
+    findManyMock.mockResolvedValueOnce([productRow({ tags: null as unknown as [] })]);
+
+    const [card] = (await getProductCards()).items;
+
+    expect(card.tag).toBeNull();
   });
 });
 

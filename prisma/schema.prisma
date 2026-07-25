@@ -24,13 +24,24 @@ model Product {
   // Nullable to accommodate pre-import rows; provenance/future-diffing only
   // — `slug` remains the upsert key, never `wooId`.
   wooId       Int?     @unique
+  // tags: owner-curated highlight badges (design D11), additive to the WooCommerce
+  // import. NEVER written by `scripts/catalog/import.ts` — a re-import upsert
+  // that touched this column would silently clear every tag the owner set by
+  // hand. Defaults to empty; at most one tag is rendered (BEST_SELLER over NEW).
+  tags        ProductTag[] @default([])
 
   categories Category[]
   variants   ProductVariant[]
   media      ProductMedia[]
+  reviews    Review[]
 
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
+}
+
+enum ProductTag {
+  BEST_SELLER
+  NEW
 }
 
 model ProductVariant {
@@ -87,4 +98,39 @@ model ProductMedia {
   position Int     @default(0)
 
   createdAt DateTime @default(now()) @db.Timestamptz(6)
+}
+
+// Fase 2 (design D9/D10). Read-only from the app's point of view: there is no
+// public submission endpoint or moderation UI in this phase. Rows are
+// inserted/approved by hand via psql, following REVIEWS.md at the repo root.
+// The rating range (1-5) cannot be expressed in Prisma's schema language, so
+// it is added as a hand-appended CHECK constraint in the migration SQL.
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Review {
+  id String @id @default(cuid())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  rating Int
+  title  String?
+  body   String
+
+  authorName String
+  // authorEmail: optional, collected for the owner's own follow-up only.
+  // MUST NEVER be selected by a DAL query or serialized into any DTO/HTML
+  // [INV-3] — see src/lib/data/reviews.ts.
+  authorEmail String?
+
+  status ReviewStatus @default(PENDING)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([productId, status])
 }
