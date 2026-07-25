@@ -1,0 +1,38 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* Decorative separator between pills, not text — `--border` is documented in
+ * tokens.css as "hairline separators, decorative only", so it carries no
+ * contrast target. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+}
+
+/* Every swatch — regardless of the material's own colour — gets a border so
+ * a near-white finish (e.g. "laqueado blanco") stays visible against the
+ * card's `--surface` background instead of blending into it. `--border-strong`
+ * measures 3.20:1 on `--surface` (computed for this PR; tokens.css already
+ * documents >=3:1 on `--bg`), meeting the 3:1 non-text UI-component target. */
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  flex: none;
+}
+
+/* `--text-soft` measures 7.43:1 on `--surface` (documented in tokens.css) —
+ * comfortably above the 4.5:1 body-text target. */
+.label {
+  font-size: var(--step--1);
+  line-height: 1;
+  color: var(--text-soft);
+}

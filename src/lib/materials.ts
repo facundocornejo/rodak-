@@ -1,47 +1,42 @@
 /**
  * Material → swatch colour lookup for the card/PDP material pills (design D7).
  *
- * The map holds ONLY materials that actually exist in the database. An unknown
- * material resolves to `null` and the caller renders a text-only pill with no
- * colour dot. The two rejected alternatives are the reason this file exists:
- * a hash-derived colour invents a finish the workshop does not sell, and a
- * neutral grey dot reads as a real grey finish. Degrading to "no dot" is the
- * only option that cannot lie about the product.
+ * An unknown material resolves to `null` and the caller renders a text-only
+ * pill with no colour dot. The two rejected alternatives are the reason this
+ * file exists: a hash-derived colour invents a finish the workshop does not
+ * sell, and a neutral grey dot reads as a real grey finish. Degrading to
+ * "no dot" is the only option that cannot lie about the product.
  *
  * ────────────────────────────────────────────────────────────────────────────
  * PROVENANCE OF THIS MAP — READ BEFORE ADDING AN ENTRY
  *
- * Canonical query (the map may only be populated from its result):
+ * `SELECT DISTINCT material FROM "ProductVariant"` returns a single row:
+ * `NULL`, 272 of 272 variants (verified against the committed catalog
+ * snapshot, `data/woo-snapshot/snapshot.json`, `fetchedAt`
+ * `2026-07-22T13:46:29.855Z`, 88 products, replayed through
+ * `scripts/catalog/transform.ts#transformProduct`). The origin catalog carries
+ * a single variation attribute, "Medida (mm)"; it has no material/madera/
+ * acabado attribute at all, so `mapAttributes` leaves `material` null for
+ * every variant today. **No product in the database carries a material.**
  *
- *     SELECT DISTINCT material FROM "ProductVariant" ORDER BY material;
+ * The owner has nonetheless decided (PR4a) to pre-populate this map with the
+ * wood species and lacquer finishes an Argentine solid-wood furniture
+ * workshop plausibly offers, each mapped to an OKLCH colour that resembles
+ * the real material. This is deliberately NOT "inventing material data for a
+ * product": no row in `ProductVariant`, no fixture and no test pretends any
+ * SKU has one of these materials. `materialToken()` still returns `null` for
+ * every value that actually reaches it in production, because
+ * `ProductCardDTO.materials` is `[]` for all 88 products and
+ * `ProductVariantDTO.material` is `null` for all 272 variants — `SwatchRow`
+ * therefore renders nothing today regardless of this map's contents. The
+ * entries exist so that the day a real `material` value is loaded into the
+ * database (re-export with a material attribute, or an owner-supplied
+ * backfill), a swatch appears immediately with no code change here.
  *
- * No database was running when this shipped, so the same values were derived
- * from the committed catalog snapshot the importer replays into
- * `ProductVariant` — `data/woo-snapshot/snapshot.json`, `fetchedAt`
- * `2026-07-22T13:46:29.855Z`, `counts` 88 products — by running every product
- * through `scripts/catalog/transform.ts#transformProduct` (the exact function
- * `scripts/catalog/import.ts` uses to build variant rows) and collecting
- * `variant.material`.
- *
- * RESULT (272 variants over 88 products):
- *
- *     material
- *     ---------
- *     NULL          -- 272 of 272 variants
- *     (0 non-null distinct values)
- *
- * The origin catalog carries a single variation attribute, "Medida (mm)"
- * (104 distinct values); it has no material/madera/acabado attribute at all, so
- * `mapAttributes` leaves `material` null for every variant. The map is
- * therefore EMPTY ON PURPOSE, and `materialToken` currently returns `null` for
- * every input — the honest degradation path is the only path in production
- * today.
- *
- * Consequences for later PRs: `ProductCardDTO.materials` is always `[]`, so no
- * swatch row renders on any card, and the PDP renders no material selector.
- * Do NOT "fix" that by inventing entries here — the fix is either a real
- * material attribute in the origin catalog (re-export + re-import) or owner-
- * supplied data. Re-run the query above after any such change.
+ * Re-run the query above after any catalog change that adds a material
+ * attribute, and extend this map from the real distinct values it returns —
+ * do not extend it from guesses at that point; the guesses live here only
+ * because there is nothing real to read yet.
  * ────────────────────────────────────────────────────────────────────────────
  */
 
@@ -69,15 +64,26 @@ export function normalizeMaterial(material: string): string {
  * `var(--…)` names because `tokens.css` intentionally has no per-material
  * tokens (the palette there is the editorial theme, not a wood chart).
  *
- * Empty by construction — see the provenance block above. Keys MUST be written
- * in normalized form; `materials.test.ts` fails if one is not.
+ * Plausible woods/finishes only — see the provenance block above for why
+ * these are here despite no product carrying a material today. Keys MUST be
+ * written in normalized form; `materials.test.ts` fails if one is not.
  *
  * A `Map`, not an object literal: with a plain object, a material named
  * "constructor" or "toString" resolves through the prototype chain and would
  * hand a *function* to a CSS custom property. A `Map` has no such keys.
  */
 export const MATERIAL_TOKENS: ReadonlyMap<string, string> = new Map<string, string>([
-  // Intentionally empty. Populate only from the query documented above.
+  ["roble", "oklch(0.62 0.045 60)"], // roble (oak) — warm medium tan-brown
+  ["nogal", "oklch(0.38 0.045 50)"], // nogal (walnut) — dark chocolate brown
+  ["paraiso", "oklch(0.78 0.06 80)"], // paraíso (chinaberry) — light honeyed gold
+  ["guatambu", "oklch(0.88 0.02 85)"], // guatambú — pale cream, near-white
+  ["petiribi", "oklch(0.5 0.06 40)"], // petiribí — reddish mid-brown
+  ["lenga", "oklch(0.68 0.035 45)"], // lenga — light pinkish tan
+  ["pino", "oklch(0.82 0.04 90)"], // pino (pine) — pale straw yellow
+  ["cedro", "oklch(0.55 0.07 35)"], // cedro (cedar) — reddish auburn
+  ["wengue", "oklch(0.28 0.03 50)"], // wengué — near-black exotic brown
+  ["laqueado blanco", "oklch(0.97 0.005 90)"], // white lacquer finish
+  ["laqueado negro", "oklch(0.18 0.005 90)"], // black lacquer finish
 ]);
 
 /**

@@ -1,0 +1,77 @@
+.card {
+  list-style: none;
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+  transition: box-shadow var(--dur-mid) var(--ease-out);
+}
+
+.link:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* `:focus-visible` is inherited from globals.css (the whole card, being a
+ * single link, gets the ring — never removed, never replaced with nothing). */
+
+.stage {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: var(--card-stage);
+}
+
+.image {
+  object-fit: cover;
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  background: var(--card-stage);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  padding-top: 0;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  min-height: 1em;
+}
+
+/* `--text-faint` measures 5.13:1 on --bg / 4.84:1 on --surface (documented in
+ * tokens.css) — above the 4.5:1 body-text target for this small label. */
+.category {
+  font-size: var(--step--1);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.name {
+  font-size: var(--step-0);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+/* `--sale` measures 4.58:1 on `--surface` (computed for this PR; tokens.css
+ * documents 4.86:1 on `--bg`) — above the 4.5:1 body-text target. Reused here
+ * rather than introducing a new "warning" colour: it is already this
+ * project's one non-neutral status colour. */
+.outOfStock {
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--sale);
+}

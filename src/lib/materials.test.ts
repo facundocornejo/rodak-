@@ -21,14 +21,14 @@ describe("normalizeMaterial", () => {
 
 describe("MATERIAL_TOKENS", () => {
   /**
-   * The map is empty today because `SELECT DISTINCT material FROM
-   * "ProductVariant"` yields only NULL (see the provenance block in
-   * `materials.ts`). This test is the tripwire: it fails the moment someone adds
-   * an entry, forcing them to re-read that block and re-run the query instead of
-   * inventing a wood colour.
+   * Populated per the owner's PR4a decision (see the provenance block in
+   * `materials.ts`): plausible woods/finishes, NOT sourced from the real
+   * catalog, which still has zero non-null `material` values. This test only
+   * pins "the map is non-empty" — never an exact size, which every future
+   * addition would have to bump.
    */
-  it("is empty, matching the real catalog's zero non-null materials", () => {
-    expect(MATERIAL_TOKENS.size).toBe(0);
+  it("is non-empty (owner-populated, see materials.ts provenance block)", () => {
+    expect(MATERIAL_TOKENS.size).toBeGreaterThan(0);
   });
 
   it.each([...MATERIAL_TOKENS])("key %s is stored in normalized form", (key) => {
@@ -45,9 +45,14 @@ describe("materialToken", () => {
     expect(materialToken("Petiribí no mapeado")).toBeNull();
   });
 
+  it("resolves a known material to its OKLCH colour", () => {
+    expect(materialToken("Roble")).toBe(MATERIAL_TOKENS.get("roble"));
+  });
+
   it("returns null for every material present in the real catalog today", () => {
     // Every variant's material is NULL in the snapshot, so this IS the whole
-    // production input set.
+    // production input set — the map's contents never surface a swatch until
+    // real material data is loaded (see materials.ts provenance block).
     expect(materialToken(null)).toBeNull();
   });
 
@@ -64,8 +69,6 @@ describe("materialToken", () => {
   });
 
   it("looks entries up through the normalizer", () => {
-    // Vacuous while the map is empty; it starts asserting real behaviour the
-    // moment an entry exists, without hardcoding a fabricated material here.
     for (const [key, value] of MATERIAL_TOKENS) {
       expect(materialToken(key)).toBe(value);
       expect(materialToken(key.toUpperCase())).toBe(value);
