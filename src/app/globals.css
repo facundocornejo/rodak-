@@ -1,0 +1,129 @@
+@import "./tokens.css";
+
+/*
+ * Global stylesheet — plain CSS, no Tailwind and no PostCSS toolchain (D0).
+ *
+ * Styling strategy for the whole storefront, chosen explicitly so the repo
+ * never grows two competing patterns:
+ *   1. `tokens.css`  — every colour, space, type, radius, shadow and motion value.
+ *   2. `globals.css` — this file: reset + element-level base styles + a11y defaults.
+ *   3. `*.module.css` — ONE CSS Module per component owns everything else.
+ * There are no global utility classes: a component that needs the page
+ * container implements it from `--wrap` / `--wrap-pad` in its own module.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Anchor targets clear the sticky header. */
+  scroll-padding-top: 88px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--family-body);
+  font-size: var(--step-0);
+  line-height: var(--lh-body);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+
+  /* Keeps the footer at the bottom on short pages (pages own their <main>). */
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--family-display);
+  font-optical-sizing: auto; /* Bricolage Grotesque carries an `opsz` axis */
+  font-weight: 700;
+  line-height: var(--lh-display);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+ul[class],
+ol[class] {
+  list-style: none;
+}
+
+/* Keyboard focus is always visible; `outline: none` is never used bare. */
+:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* Inside a dark island the light-surface accent would disappear. */
+:where([data-island="dark"]) :focus-visible {
+  outline-color: var(--feature-accent);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--feature-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

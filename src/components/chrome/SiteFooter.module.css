@@ -1,0 +1,44 @@
+.footer {
+  /* A different background separates the footer from the page — no heavy rule
+   * needed on top of it. */
+  background: var(--surface);
+  /* Guarantees breathing room even on a page whose last block has no padding
+   * of its own. */
+  margin-top: var(--space-5xl);
+  padding-block: var(--space-4xl) var(--space-2xl);
+}
+
+.inner {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: var(--wrap-pad);
+  display: grid;
+  /* More space between the two groups than inside either of them. */
+  gap: var(--space-3xl);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.wordmark {
+  font-family: var(--family-display);
+  font-optical-sizing: auto;
+  font-size: var(--step-1);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.blurb {
+  max-width: 42ch;
+  color: var(--text-soft);
+}
+
+.legal {
+  font-size: var(--step--1);
+  color: var(--text-faint);
+}

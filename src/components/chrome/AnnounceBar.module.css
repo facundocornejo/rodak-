@@ -1,0 +1,36 @@
+.bar {
+  background: var(--feature-bg);
+  color: var(--feature-text);
+}
+
+.text {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding: var(--space-sm) var(--wrap-pad);
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  /* Row gap tight, column gap wide: the claims read as separate items without
+   * a separator glyph, and a wrapped line still groups correctly. */
+  gap: var(--space-xs) var(--space-2xl);
+
+  font-size: var(--step--1);
+  font-weight: 500;
+  line-height: 1.5;
+  /* Loosened tracking: short, centred, near-label copy on a dark surface. */
+  letter-spacing: 0.06em;
+  /* Full-contrast ink on the island: dimming light text over a dark
+   * background reads as disabled instead of secondary. */
+  color: var(--feature-text);
+}
+
+/* Each claim stays whole; the strip only ever breaks between claims. */
+.claim {
+  white-space: nowrap;
+}
+
+.mark {
+  color: var(--feature-accent);
+  font-weight: 700;
+}
