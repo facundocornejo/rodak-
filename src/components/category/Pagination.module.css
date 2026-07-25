@@ -1,0 +1,41 @@
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  margin-top: var(--space-3xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--border);
+}
+
+/* `--border-strong` measures >=3:1 on `--bg` (tokens.css) — the documented
+ * pairing for interactive-control borders. Touch target ~44px via padding. */
+.control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding-inline: var(--space-lg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+a.control:hover {
+  background: var(--surface-2);
+}
+
+/* Disabled is visible, not hidden: reduced contrast + a blocked cursor,
+ * never `display:none`. `--text-faint` still measures 5.13:1 on `--bg`
+ * (tokens.css) even though WCAG does not require AA on a disabled control. */
+span.control[aria-disabled="true"] {
+  color: var(--text-faint);
+  border-color: var(--border);
+  cursor: not-allowed;
+}
+
+.status {
+  font-size: var(--step--1);
+  color: var(--text-soft);
+}

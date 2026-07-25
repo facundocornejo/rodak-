@@ -1,0 +1,6 @@
+.wrap {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: var(--wrap-pad);
+  padding-bottom: var(--space-6xl);
+}

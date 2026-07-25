@@ -1,0 +1,45 @@
+/* Mirrors `ProductGrid.module.css` exactly, so the skeleton reserves the
+ * same geometry the real grid fills in. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-xl);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* Mirrors `ProductCard.module.css`'s `.stage` (`aspect-ratio: 4/5`). */
+/* `--dur-mid` (0.35s) is scaled x4 rather than a new raw duration invented
+ * for this one animation: a bare pulse loop that fast reads as flicker, and
+ * tokens.css has no slower step to reach for instead. */
+.stage {
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  animation: pulse calc(var(--dur-mid) * 4) ease-in-out infinite alternate;
+}
+
+.line,
+.lineShort {
+  height: 1em;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  animation: pulse calc(var(--dur-mid) * 4) ease-in-out infinite alternate;
+}
+
+.lineShort {
+  width: 60%;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.6;
+  }
+}
