@@ -1,0 +1,64 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* `aspect-ratio: 1` reserved up front (design D13-PDP) — the box exists
+ * before the image finishes loading, so there is nothing to shift. */
+.stage {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-lg);
+  background: var(--stage);
+  overflow: hidden;
+}
+
+.image {
+  object-fit: cover;
+  cursor: zoom-in;
+  transition: transform var(--dur-mid) var(--ease-out);
+}
+
+/* Simple hover zoom — no modal/overlay. Touch devices simply do not get it,
+ * which is the accepted trade-off for "simple zoom only". */
+.image:hover {
+  transform: scale(1.12);
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  background: var(--stage);
+}
+
+.thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* `--border`/`--border-strong` on `--bg` (tokens.css: decorative hairline /
+ * >=3:1 interactive-control pairing respectively). */
+.thumb {
+  display: block;
+  width: 76px;
+  height: 76px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.thumb:hover {
+  border-color: var(--border-strong);
+}
+
+.thumbActive {
+  border-color: var(--text);
+}
+
+.thumbImage {
+  width: 76px;
+  height: 76px;
+  object-fit: cover;
+}

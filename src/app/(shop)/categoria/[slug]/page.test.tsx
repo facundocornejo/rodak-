@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 // `products.ts`/`categories.ts` import `server-only` and `@/lib/db`, neither
 // of which loads in plain jsdom — same stubbing pattern as
@@ -12,13 +12,29 @@ vi.mock("@/lib/data/products", () => ({
   getProductCardsByCategory: getProductCardsByCategoryMock,
 }));
 
-// Not exercised by this test (only the page's default export calls it), but
-// the module graph still needs it to resolve without touching `@/lib/db`.
+const getCategoryBySlugMock = vi.fn();
+
 vi.mock("@/lib/data/categories", () => ({
-  getCategoryBySlug: vi.fn(),
+  getCategoryBySlug: getCategoryBySlugMock,
 }));
 
-const { CategoryGrid } = await import("./page");
+// Real `notFound()` throws a special (uncatchable-by-design) error to abort
+// rendering — mirrored here so `CategoryPage` behaves the same way under
+// test as it does in production, instead of silently falling through to
+// `category.name`/`category.productCount` on a `null` category.
+const notFoundMock = vi.fn(() => {
+  throw new Error("NEXT_NOT_FOUND");
+});
+
+vi.mock("next/navigation", () => ({
+  notFound: notFoundMock,
+}));
+
+const { default: CategoryPage, CategoryGrid } = await import("./page");
+
+afterEach(() => {
+  vi.clearAllMocks();
+});
 
 /**
  * Follow-up 4 (PR4b review): the empty-catalog branch had never been
@@ -73,5 +89,53 @@ describe("CategoryGrid — zero-product branch", () => {
 
     expect(screen.getByText("Mesa Kendall")).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Paginación" })).toBeInTheDocument();
+  });
+});
+
+/**
+ * PR5 review WARNING #3: `getCategoryBySlug` was mocked but never configured
+ * with a return value, so the `null` → `notFound()` branch was documented as
+ * "not exercised" — inverting the guard (or deleting it outright) would have
+ * failed no test. These two tests pin both directions of that guard.
+ */
+describe("CategoryPage — notFound() branch", () => {
+  it("calls notFound() when the category does not exist, and never reaches the render", async () => {
+    getCategoryBySlugMock.mockResolvedValueOnce(null);
+
+    await expect(
+      CategoryPage({
+        params: Promise.resolve({ slug: "no-existe-esta-categoria" }),
+        searchParams: Promise.resolve({}),
+      }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+
+    expect(notFoundMock).toHaveBeenCalledTimes(1);
+    // Never even reaches the paginated grid lookup once the category is null.
+    expect(getProductCardsByCategoryMock).not.toHaveBeenCalled();
+  });
+
+  it("does NOT call notFound() when the category exists — a known-but-empty category still renders, not 404s", async () => {
+    // `CategoryPage`'s JSX nests the async `CategoryGrid` inside
+    // `<Suspense>` (unavoidable — that async component only resolves under
+    // Next's real RSC renderer, not client-side `render()`; see
+    // `CategoryGrid`'s own tests above for why it is awaited directly
+    // instead). This test therefore only awaits `CategoryPage` itself —
+    // constructing that JSX does not execute `CategoryGrid`'s body — and
+    // asserts the guard was not tripped, which is the behaviour this
+    // follow-up exists to pin.
+    getCategoryBySlugMock.mockResolvedValueOnce({
+      slug: "accesorios",
+      name: "Accesorios",
+      productCount: 0,
+    });
+
+    await expect(
+      CategoryPage({
+        params: Promise.resolve({ slug: "accesorios" }),
+        searchParams: Promise.resolve({}),
+      }),
+    ).resolves.toBeTruthy();
+
+    expect(notFoundMock).not.toHaveBeenCalled();
   });
 });

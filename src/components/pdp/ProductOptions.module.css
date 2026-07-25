@@ -1,0 +1,109 @@
+/* More space between groups (selectors vs. buy info) than within a group
+ * (the options themselves) — design's spacing rule. */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.group {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.legend {
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--text-soft);
+  padding: 0;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.optionSlot {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Visually-hidden but still focusable/toggleable native radio — the `label`
+ * right after it is what actually looks like a pill (standard accessible
+ * "hidden input + styled label" pattern, and it is not a `<button>`). */
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+  border: 0;
+}
+
+/* `--border-strong` measures >=3:1 on `--bg` (tokens.css) — the documented
+ * pairing for interactive-control borders, same as `Pagination.module.css`.
+ * Touch target ~44px via padding. */
+.option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding-inline: var(--space-lg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.input:checked + .option {
+  border-color: var(--text);
+  background: var(--surface-2);
+}
+
+/* Disabled is visible, not hidden: reduced contrast + a blocked cursor,
+ * never removed from the DOM (design D8). `--text-faint` still measures
+ * 5.13:1 on `--bg` even though WCAG does not require AA on a disabled
+ * control (same reasoning as `Pagination.module.css`). */
+.input:disabled + .option {
+  color: var(--text-faint);
+  border-color: var(--border);
+  cursor: not-allowed;
+}
+
+.input:focus-visible + .option {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-sm);
+}
+
+.buyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Same status colour as `Availability.module.css`'s out-of-stock line —
+ * this is also an "unavailable" state, not a new colour decision. */
+.unavailable {
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--sale);
+}
+
+/* `--text-soft` measures 7.88:1 on `--bg` (tokens.css) — same pairing as
+ * `Availability.module.css`'s in-stock line; this is deliberately NOT the
+ * `--sale` colour, since a quote is neutral information, not a warning. */
+.consultNote {
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--text-soft);
+}

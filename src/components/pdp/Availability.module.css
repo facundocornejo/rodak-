@@ -1,0 +1,13 @@
+.inStock {
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+/* `--sale` measures 4.86:1 on `--bg` (tokens.css) — reused as this project's
+ * one status colour, same pairing as `ProductCard.module.css`'s `.outOfStock`. */
+.outOfStock {
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--sale);
+}
