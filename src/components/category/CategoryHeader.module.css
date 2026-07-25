@@ -1,0 +1,31 @@
+/* No horizontal containment here on purpose: the page's own wrap
+ * (`categoria/[slug]/page.module.css`) owns `max-width`/`padding-inline`
+ * once, and this header — like `ProductGrid`/`Pagination` in the same
+ * column — renders edge-to-edge inside it. Double-applying both would
+ * narrow the content with stacked padding. */
+.head {
+  padding-top: var(--space-4xl);
+  padding-bottom: var(--space-2xl);
+}
+
+/* `--accent-2` on `--bg` measures 5.28:1 (tokens.css) — the only accent
+ * allowed as light-surface text. Same pairing as the home page's eyebrow. */
+.eyebrow {
+  display: block;
+  font-size: var(--step--1);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--accent-2);
+}
+
+.title {
+  font-size: var(--step-2);
+  margin-top: var(--space-sm);
+}
+
+/* `--text-soft` measures 7.88:1 on `--bg` (tokens.css). */
+.count {
+  margin-top: var(--space-xs);
+  color: var(--text-soft);
+}

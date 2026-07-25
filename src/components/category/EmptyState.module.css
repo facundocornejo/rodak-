@@ -1,0 +1,23 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-lg);
+  padding-block: var(--space-3xl);
+}
+
+/* `--text-soft` measures 7.88:1 on `--bg` (tokens.css). */
+.message {
+  color: var(--text-soft);
+  max-width: 60ch;
+}
+
+/* Underline is the gold mark, not gold text — `--accent` stays banned as
+ * text on a light surface (2.19:1, tokens.css). `--text` carries the word. */
+.link {
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 0.2em;
+  padding-block: var(--space-xs);
+}

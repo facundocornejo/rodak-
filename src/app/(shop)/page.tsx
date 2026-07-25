@@ -1,3 +1,8 @@
+// `EmptyState` lives under `src/components/category/` because PR5 is the
+// slice that built it as a real component, but it is a shared surface (PR5's
+// task: "migrate [the home page's inline empty-state block] to this shared
+// component so there is one empty state, not two") — reused here unchanged.
+import { EmptyState } from "@/components/category/EmptyState";
 import { CategoryList } from "@/components/home/CategoryList";
 import { CraftBand } from "@/components/home/CraftBand";
 import { Hero } from "@/components/home/Hero";
@@ -43,12 +48,8 @@ export default async function HomePage() {
         {catalog.items.length === 0 ? (
           // Honest empty state (design "states" rule) — no product exists in
           // this environment yet, and the copy says exactly that, nothing
-          // more. PR5's dedicated `EmptyState` component formalizes this
-          // pattern for the category/search surfaces.
-          <p className={styles.empty}>
-            Todavía no hay productos publicados. Volvé pronto — estamos
-            cargando el catálogo.
-          </p>
+          // more.
+          <EmptyState message="Todavía no hay productos publicados. Volvé pronto — estamos cargando el catálogo." />
         ) : (
           <ProductGrid products={catalog.items} />
         )}
