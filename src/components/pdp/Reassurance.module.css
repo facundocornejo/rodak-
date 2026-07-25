@@ -1,0 +1,28 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--border);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* `--accent-2` on a non-text SVG icon (3:1 UI minimum) — 5.28:1 on `--bg`
+ * (tokens.css) clears it comfortably, same pairing as `TrustRow.module.css`. */
+.icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--accent-2);
+}
+
+/* `--text-soft` measures 7.88:1 on `--bg` (tokens.css). */
+.text {
+  font-size: var(--step--1);
+  color: var(--text-soft);
+}

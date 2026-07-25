@@ -1,0 +1,17 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.label {
+  font-size: var(--step--1);
+}
