@@ -35,5 +35,7 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Catalog import snapshot (local artifact, never committed — see design D6)
-data/
+# Catalog import snapshot (local artifact, never committed — see design D6).
+# Anchored to the repo root on purpose: an unanchored `data/` also matched
+# `src/lib/data/`, silently ignoring every new DAL file.
+/data/
