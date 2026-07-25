@@ -1,0 +1,17 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-block: var(--space-3xl);
+}
+
+.line,
+.lineShort {
+  height: 1em;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.lineShort {
+  width: 60%;
+}

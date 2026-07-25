@@ -1,0 +1,10 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.line {
+  color: var(--text);
+  line-height: var(--lh-body);
+}

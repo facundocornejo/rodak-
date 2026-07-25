@@ -28,29 +28,11 @@
   gap: var(--space-sm);
 }
 
-.optionSlot {
-  position: relative;
-  display: inline-flex;
-}
-
-/* Visually-hidden but still focusable/toggleable native radio — the `label`
- * right after it is what actually looks like a pill (standard accessible
- * "hidden input + styled label" pattern, and it is not a `<button>`). */
-.input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  clip-path: inset(50%);
-  border: 0;
-}
-
-/* `--border-strong` measures >=3:1 on `--bg` (tokens.css) — the documented
- * pairing for interactive-control borders, same as `Pagination.module.css`.
- * Touch target ~44px via padding. */
+/* `role="radio"` on a plain element (never `<button>`, per D8b) — see
+ * ProductOptions.tsx's docblock for why this replaced the native
+ * `<input type="radio">` group. `--border-strong` measures >=3:1 on `--bg`
+ * (tokens.css), same pairing as `Pagination.module.css`. Touch target ~44px
+ * via padding. */
 .option {
   display: inline-flex;
   align-items: center;
@@ -62,27 +44,30 @@
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
+  user-select: none;
 }
 
-.input:checked + .option {
+.option[aria-checked="true"] {
   border-color: var(--text);
   background: var(--surface-2);
 }
 
-/* Disabled is visible, not hidden: reduced contrast + a blocked cursor,
- * never removed from the DOM (design D8). `--text-faint` still measures
- * 5.13:1 on `--bg` even though WCAG does not require AA on a disabled
- * control (same reasoning as `Pagination.module.css`). */
-.input:disabled + .option {
+/* Disabled is visible, not hidden, and never signalled by colour alone:
+ * reduced contrast/opacity AND a blocked cursor, still focusable (design D8
+ * — `aria-disabled`, not the native `disabled` attribute, PR6a review
+ * WARNING). `--text-faint` still measures 5.13:1 on `--bg` even though WCAG
+ * does not require AA on a disabled control (same reasoning as
+ * `Pagination.module.css`). */
+.optionDisabled {
   color: var(--text-faint);
   border-color: var(--border);
   cursor: not-allowed;
+  opacity: 0.7;
 }
 
-.input:focus-visible + .option {
+.option:focus-visible {
   outline: var(--focus-width) solid var(--focus-ring);
   outline-offset: var(--focus-offset);
-  border-radius: var(--radius-sm);
 }
 
 .buyInfo {
