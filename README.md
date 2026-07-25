@@ -47,24 +47,24 @@ All four MUST exit `0` before opening a PR.
 ## Environment variables
 
 Copy `.env.example` to `.env` and fill in real values locally. Never commit
-`.env` or any file with real secrets — only variable *names* belong in
-`.env.example`.
+`.env` or any file with real secrets. `.env.example` carries variable *names*
+plus, as literal values, ONLY dev-only credentials that are already public in
+the committed `docker-compose.dev.yml` — never a staging or production value.
 
 | Variable       | Purpose                                                                    |
 | -------------- | --------------------------------------------------------------------------- |
-| `DATABASE_URL` | PostgreSQL connection string (local dev / staging). See "Local database" below — pass inline, do not put it in a file. |
+| `DATABASE_URL` | PostgreSQL connection string. Local dev may keep the public dev-only credential in `.env` — but only `next dev`/`next build` read that file; the Prisma CLI and `catalog:*` scripts need it passed inline. Staging/production values live in Coolify — NEVER written to a file. See "Local database" below. |
 | `STAGING_HOST` | Staging hostname; drives `robots.ts` noindex logic and, absent `SITE_URL`, derives `metadataBase`. |
-| `SITE_URL`     | Canonical site URL for `metadataBase` (e.g. `https://rodak.com.ar`). Takes precedence over a `STAGING_HOST`-derived URL; set at the real production cutover. See `src/lib/site-url.ts`. |
+| `SITE_URL`     | Canonical site URL for `metadataBase` (production: `https://rodak.ar`). Takes precedence over a `STAGING_HOST`-derived URL; set at the real production cutover. See `src/lib/site-url.ts`. |
 | `NODE_ENV`     | Standard Node environment flag.                                            |
 
 Staging values (including the real `STAGING_HOST` and, at cutover,
 `SITE_URL`) are configured in Coolify, never in this repository.
 
-`.env.example` (names only, no values) documents this same table for local
-`.env` setup. If it is missing from your checkout, recreate it manually —
-this sandbox's permission system denies any tool from writing to `.env*`
-paths, so it could not be committed automatically; ask whoever has an editor
-open outside this tool to create it with the four variable names above.
+`.env.example` (committed at the repo root) documents this same table for
+local `.env` setup. The literal `DATABASE_URL` it ships is the dev-only
+docker-compose credential; if `localhost:5434` does not reach the database,
+substitute the WSL VM's IP as described under "Local database" below.
 
 ## Local database
 
@@ -92,8 +92,13 @@ so `npm run dev` needs a reachable `DATABASE_URL`.
    wsl hostname -I   # first IP printed is the one to use
    ```
 
-3. Run Prisma commands with `DATABASE_URL` passed inline — never write it to
-   a file (see "Environment variables" above):
+3. Run Prisma commands with `DATABASE_URL` passed inline (below). A local
+   `.env` copied from `.env.example` is read by `next dev`/`next build`
+   ONLY — the Prisma CLI does not load `.env` (this repo's
+   `prisma.config.ts` has no `dotenv` import) and neither do the
+   `catalog:*` scripts, so for the commands below inline is the only way.
+   Staging/production URLs must NEVER be written to a file (see
+   "Environment variables" above):
 
    ```bash
    DATABASE_URL="postgresql://rodak:rodak_dev_only@<host>:5434/rodak_dev" npx prisma migrate dev
@@ -110,7 +115,10 @@ so `npm run dev` needs a reachable `DATABASE_URL`.
    reported and removed only by the explicit `npm run catalog:prune`
    (dry run by default, `-- --confirm` to write).
 
-4. `npm run dev` also needs `DATABASE_URL` in its shell for the same reason:
+4. `npm run dev` needs `DATABASE_URL` too — unlike the commands above,
+   `next dev` DOES read a local `.env`, so if you created one from
+   `.env.example` (step 3 note) no inline var is needed. Without a `.env`,
+   pass it the same way:
 
    ```bash
    DATABASE_URL="postgresql://rodak:rodak_dev_only@<host>:5434/rodak_dev" npm run dev
