@@ -27,7 +27,7 @@ Fuentes: https://almanac.httparchive.org/en/2024/performance · https://almanac.
 - `next/image` con `formats: ['image/avif', 'image/webp']`. Calidad AVIF ~60–70 suele ser indistinguible; probar con fotos reales (vetas finas de madera a veces piden más).
 - **Self-hosteado en el VPS**: optimiza on-demand con sharp y cachea en `.next/cache/images`. La primera request paga CPU (AVIF en frío: 3–5 s/imagen); con 90 productos el universo de variantes se calienta en horas. **PERSISTIR `.next/cache` como volumen en Coolify** (si no, cada deploy re-encodea todo). Gotcha sharp/glibc: memory allocator (jemalloc o `MALLOC_ARENA_MAX`) — nota oficial de sharp. Limitar `deviceSizes`/`imageSizes` a los breakpoints reales; subir `minimumCacheTTL`.
 - `sizes` correcto por layout (grilla: `(max-width: 768px) 50vw, 25vw`) — sin eso el browser baja la variante más grande.
-- **JAMÁS lazy-loadear la imagen LCP**: `priority` en hero/primera imagen de PDP (mejora mediana de 0,7 s de LCP según web.dev). Below-the-fold sí lazy (default).
+- **JAMÁS lazy-loadear la imagen LCP**: `preload` en la primera imagen de cada página — grilla (índice 0), stage de PDP (mejora mediana de 0,7 s de LCP según web.dev). Next 16 deprecó `priority`; usa `preload` con la misma semántica. Invariante del proyecto: **exactamente un `<link rel="preload" as="image">` por página**, el resto lazy (default).
 - Alternativas si el VPS sufriera: pre-optimizar en build, Cloudflare Image Transformations, o Cloudflare Images (~$5–7/mes). Polish es redundante con next/image.
 
 Fuentes: https://nextjs.org/docs/app/guides/self-hosting · https://sharp.pixelplumbing.com/install#linux-memory-allocator · https://web.dev/articles/fetch-priority · https://www.filemint.dev/blog/avif-format-2026 · https://blog.platformatic.dev/scale-nextjs-image-optimization-platformatic
@@ -84,7 +84,7 @@ Fuentes: https://nextjs.org/docs/app/guides/self-hosting · https://doc.traefik.
 
 **Top 5 acciones por impacto:**
 1. **Estático/ISR + Cloudflare adelante** (Full strict, Cache Rules, edge-cache de HTML con bypass por cookie) → ataca el cuello #1: TTFB.
-2. **Pipeline de imágenes** (AVIF+WebP, `sizes`, `priority` en LCP, cache de sharp en volumen) → ataca el 60–80% del peso.
+2. **Pipeline de imágenes** (AVIF+WebP, `sizes`, `preload` en la imagen LCP, cache de sharp en volumen) → ataca el 60–80% del peso.
 3. **Videos en R2** (egress $0, permitido por ToS; hero ≤5 MB mudo con poster).
 4. **Disciplina de JS cliente** (Server Components por defecto, `next/dynamic`, terceros al mínimo) → protege INP.
 5. **Animaciones compositor-only** (CSS primero, Motion/GSAP con dynamic import, `prefers-reduced-motion`).

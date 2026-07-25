@@ -1,0 +1,75 @@
+.section {
+  padding-block: var(--space-6xl);
+}
+
+.inner {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: var(--wrap-pad);
+}
+
+.head {
+  margin-bottom: var(--space-2xl);
+}
+
+/* `--accent-2` on `--bg` measures 5.28:1 (tokens.css) — the only accent
+ * token allowed as light-surface text; this eyebrow is that exact use case. */
+.eyebrow {
+  font-size: var(--step--1);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--accent-2);
+}
+
+.title {
+  font-size: var(--step-2);
+  margin-top: var(--space-sm);
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+/* `--border-strong` (3.40:1 on `--bg`, tokens.css: "control borders") marks
+ * the pill as an interactive control; `--text` at 16.12:1 easily clears the
+ * 4.5:1 body-text target. Touch target: min-height 44px [design a11y rule]. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 44px;
+  padding: var(--space-sm) var(--space-lg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+
+.pill:hover {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.name {
+  font-weight: 600;
+  font-size: var(--step-0);
+  color: var(--text);
+}
+
+/* `--text-faint` measures 5.13:1 on `--bg` (tokens.css) — above 4.5:1 for
+ * this small count badge. */
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6em;
+  padding-inline: var(--space-xs);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text-faint);
+  font-size: var(--step--1);
+  font-weight: 700;
+}
