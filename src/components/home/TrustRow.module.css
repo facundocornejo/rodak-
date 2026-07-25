@@ -1,0 +1,39 @@
+.section {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: var(--wrap-pad);
+  padding-block: var(--space-3xl);
+  border-block: 1px solid var(--border);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xl);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* `--accent-2` is used here on a non-text SVG icon (3:1 UI minimum, not the
+ * 4.5:1 text target); at 5.28:1 on `--bg` (tokens.css) it clears either. */
+.icon {
+  width: 26px;
+  height: 26px;
+  color: var(--accent-2);
+}
+
+.itemTitle {
+  font-size: var(--step-0);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .list {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+}

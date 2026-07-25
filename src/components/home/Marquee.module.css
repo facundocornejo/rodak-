@@ -1,0 +1,30 @@
+/*
+ * `--feature-text` on `--feature-bg` is the exact pairing `tokens.css`
+ * documents at 16.85:1 — used at full opacity here (the mockup's `color-mix`
+ * fade was dropped) so the ratio is not a new, uncomputed pairing.
+ */
+.strip {
+  background: var(--feature-bg);
+  color: var(--feature-text);
+  padding-block: var(--space-lg);
+  overflow: hidden;
+  border-block: 1px solid var(--border);
+}
+
+.track {
+  display: flex;
+  gap: var(--space-4xl);
+  white-space: nowrap;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}

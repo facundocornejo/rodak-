@@ -1,0 +1,76 @@
+/*
+ * Both text colours are the exact pairings `tokens.css` already documents for
+ * this island: `--feature-text` on `--feature-bg` measures 16.85:1,
+ * `--feature-accent` on `--feature-bg` measures 9.58:1. The CTA button
+ * inverts the same pair (background `--feature-text`, text `--feature-bg`) —
+ * contrast ratio is symmetric, so it is still 16.85:1.
+ */
+.hero {
+  background: var(--feature-bg);
+  color: var(--feature-text);
+}
+
+.inner {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding: var(--space-6xl) var(--wrap-pad) var(--space-4xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  max-width: 900px;
+}
+
+.eyebrow {
+  font-size: var(--step--1);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--feature-accent);
+}
+
+.title {
+  font-size: var(--step-4);
+  color: var(--feature-text);
+}
+
+.mark {
+  font-style: normal;
+  color: var(--feature-accent);
+}
+
+.lead {
+  font-size: var(--step-1);
+  max-width: 42ch;
+  color: var(--feature-text);
+  font-family: var(--family-body);
+  font-weight: 400;
+}
+
+.cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: 700;
+  font-size: var(--step-0);
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-pill);
+  background: var(--feature-text);
+  color: var(--feature-bg);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.cta:hover {
+  transform: translateY(-2px);
+}
+
+.ctaIcon {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 700px) {
+  .inner {
+    padding-top: var(--space-5xl);
+  }
+}
