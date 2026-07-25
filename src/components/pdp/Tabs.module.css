@@ -1,0 +1,55 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.tablist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Touch target ~44px via padding, matching `ProductOptions.module.css`'s
+ * option pills and `Pagination.module.css`'s controls. */
+.tab {
+  min-height: 44px;
+  padding-inline: var(--space-xs);
+  padding-block: var(--space-sm);
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--text-soft);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+/* Selected state is never colour-only: bold weight (already the base) +
+ * ink colour (`--text`, 16.12:1 on `--bg`) + a real underline border, not
+ * just a colour swap on `--text-soft` vs `--text`. */
+.tabActive {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+
+.tab:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-sm);
+}
+
+.panel {
+  max-width: 75ch;
+}
+
+.panel:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 640px) {
+  .tablist {
+    gap: var(--space-md);
+  }
+}

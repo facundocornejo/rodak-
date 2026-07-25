@@ -1,0 +1,61 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding-block-end: var(--space-xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.headline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.average {
+  font-size: var(--step-1);
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* `--text-soft` measures 7.88:1 on `--bg` (tokens.css). */
+.count {
+  font-size: var(--step--1);
+  color: var(--text-soft);
+}
+
+.histogram {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  max-width: 320px;
+}
+
+.histogramRow {
+  display: grid;
+  grid-template-columns: 12px 1fr 24px;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.histogramLabel,
+.histogramCount {
+  font-size: var(--step--1);
+  color: var(--text-soft);
+}
+
+.histogramTrack {
+  /* `--space-xs` (4px) — not a raw 6px (an earlier review in this phase
+   * caught two 6px values for the same reason: the scale starts at 4px). */
+  height: var(--space-xs);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.histogramFill {
+  display: block;
+  height: 100%;
+  background: var(--accent-2);
+}

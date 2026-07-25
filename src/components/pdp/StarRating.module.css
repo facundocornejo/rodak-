@@ -1,0 +1,29 @@
+.row {
+  display: inline-flex;
+  /* `--space-xs` (4px) — the scale starts here; no ad-hoc value below it
+   * (an earlier review in this phase caught a 2px gap for exactly this
+   * reason). */
+  gap: var(--space-xs);
+}
+
+.starFilled,
+.starEmpty {
+  width: 16px;
+  height: 16px;
+}
+
+/* `--accent` (gold) is banned as TEXT on a light surface (2.19:1, tokens.css)
+ * but survives as a mark/rule — this is a decorative icon fill, not a text
+ * character, and the row's actual information (`role="img"`+`aria-label`) is
+ * carried in words, not colour, so no contrast requirement applies to the
+ * fill itself. */
+.starFilled {
+  color: var(--accent);
+}
+
+/* `--border-strong` measures >=3:1 on `--bg` (tokens.css) — same pairing as
+ * every other inert/outline UI element in this phase (`Pagination`,
+ * `ProductOptions`). */
+.starEmpty {
+  color: var(--border-strong);
+}

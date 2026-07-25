@@ -1,0 +1,11 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-xl);
+}
+
+.card {
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
