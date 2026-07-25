@@ -2,6 +2,8 @@ import path from "node:path";
 
 import { defineConfig } from "vitest/config";
 
+import { TEST_PROJECTS } from "./vitest.projects";
+
 const alias = {
   "@": path.resolve(__dirname, "./src"),
 };
@@ -42,6 +44,10 @@ const alias = {
 export default defineConfig({
   resolve: { alias },
   test: {
+    // Runs once, before any project's file discovery — see
+    // `vitest.globalSetup.ts` for why this (not a `*.test.ts` file) is the
+    // mechanism that closes the "no test files found" aggregation gap.
+    globalSetup: ["./vitest.globalSetup.ts"],
     /**
      * One worker at a time, deliberately.
      *
@@ -58,38 +64,31 @@ export default defineConfig({
      * 1/2, `--maxWorkers=2` 1/3, `--maxWorkers=1` 3/3. `--pool=threads` crashed
      * 3/3.
      *
-     * The cost then was ~6.5 s instead of ~2.8 s; today, with no `*.test.tsx`
-     * yet, the 12-file / 186-test suite runs serialized in ~3.4 s. Either way
-     * it is not worth a flaky gate. Revisit if the suite ever grows big enough
-     * for serialization to hurt — this is one line.
+     * The cost then was ~6.5 s instead of ~2.8 s. PR4a ships the first real
+     * `*.test.tsx` files, so the `dom` project now loads jsdom on every run —
+     * the OOM condition above is no longer hypothetical and this line is the
+     * only thing holding it off. Do not raise it on this machine without
+     * re-measuring; a CI runner with more RAM is a different question.
+     * Revisit if the suite ever grows big enough for serialization to hurt.
      */
     maxWorkers: 1,
     projects: [
       {
         resolve: { alias },
         test: {
-          name: "node",
+          name: TEST_PROJECTS[0].name,
           environment: "node",
-          // `scripts/` holds the catalog migration pipeline; its pure transform
-          // layer is unit-tested and must run in the same `npm test` gate as
-          // the app code.
-          include: ["src/**/*.test.ts", "scripts/**/*.test.ts"],
+          include: [...TEST_PROJECTS[0].include],
         },
       },
       {
         resolve: { alias },
         test: {
-          name: "dom",
+          name: TEST_PROJECTS[1].name,
           environment: "jsdom",
-          include: ["src/**/*.test.tsx"],
+          include: [...TEST_PROJECTS[1].include],
           setupFiles: ["./vitest.setup.ts"],
         },
-        // Component tests arrive with PR4, so this project currently matches
-        // zero files. `npm run test` is unaffected (vitest only errors when NO
-        // project finds a file); `vitest run --project dom` alone exits 1 until
-        // the first `*.test.tsx` lands. `passWithNoTests` is deliberately NOT
-        // set: it does not change either behaviour here, and at root level it
-        // would hide a genuinely broken `include` pattern.
       },
     ],
   },

@@ -1,0 +1,16 @@
+/*
+ * `--accent-2` is the ONLY accent token this project allows as text on a
+ * light surface (tokens.css: "the only accent allowed for text ... eyebrows,
+ * micro-labels" — this badge IS that eyebrow use case, not a new pairing).
+ * Measured 5.28:1 on `--bg` and 4.98:1 on `--surface` (documented in
+ * tokens.css), both above the 4.5:1 body-text target. Gold (`--accent`)
+ * itself never appears as text here, matching D14.
+ */
+.badge {
+  font-family: var(--family-body);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
