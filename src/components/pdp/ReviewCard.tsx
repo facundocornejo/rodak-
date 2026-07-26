@@ -7,7 +7,24 @@ export interface ReviewCardProps {
   review: ReviewDTO;
 }
 
-const dateFormatter = new Intl.DateTimeFormat("es-AR", { dateStyle: "long" });
+/**
+ * PR7 review WARNING, fixed here: without an explicit `timeZone`,
+ * `Intl.DateTimeFormat` formats in the HOST's local timezone, so the exact
+ * same stored UTC instant (`createdAtISO`) renders on a different calendar
+ * day depending on where the process happens to run — a review created in
+ * the first hours of the UTC day reads as the PREVIOUS day once the
+ * container's local clock is Argentina's (UTC-3), so CI (commonly UTC) and
+ * production disagree about the same instant. This is the same class of
+ * environment dependence `rank.ts` already rejected `localeCompare` over
+ * (that module's own docblock). Pinned to Buenos Aires explicitly — the
+ * storefront's own locale — rather than to UTC, so the calendar day shown
+ * matches what an Argentine visitor actually experienced; Argentina has no
+ * DST, so this is a fixed UTC-3 offset year-round, not a moving target.
+ */
+const dateFormatter = new Intl.DateTimeFormat("es-AR", {
+  dateStyle: "long",
+  timeZone: "America/Argentina/Buenos_Aires",
+});
 
 /**
  * One approved review. Renders exactly `authorName`, `rating`, `title`,

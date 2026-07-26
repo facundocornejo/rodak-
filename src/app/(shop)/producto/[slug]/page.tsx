@@ -95,8 +95,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   ),
                 },
                 {
+                  // PR7 review fix: this tab was labelled "Envío y armado"
+                  // but `src/content/shipping.ts` says nothing about
+                  // assembly — a tab that promises information it does not
+                  // contain is a small false promise. Renamed to what the
+                  // content actually covers; the assembly half returns once
+                  // the owner supplies and approves that copy (see that
+                  // file's docblock).
                   id: "envio",
-                  label: "Envío y armado",
+                  label: "Envío",
                   content: <ShippingTab />,
                 },
                 {

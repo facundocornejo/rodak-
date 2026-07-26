@@ -1,0 +1,16 @@
+/* Mirrors `EmptyState.module.css`'s rhythm — same surface, same purpose
+ * (an honest line where the results grid would otherwise be). */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-lg);
+  padding-block: var(--space-3xl);
+}
+
+/* `--text-soft` measures 7.88:1 on `--bg` (tokens.css) — already-vetted
+ * pairing, not a new one. */
+.message {
+  color: var(--text-soft);
+  max-width: 60ch;
+}
