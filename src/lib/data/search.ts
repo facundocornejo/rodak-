@@ -5,7 +5,13 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { isQueryValid, rankRows } from "@/lib/search/rank";
 
-import { PRODUCT_PAGE_SIZE, type PageResult, type ProductCardDTO, type ProductTag } from "./products";
+import {
+  clampPage,
+  PRODUCT_PAGE_SIZE,
+  toProductCard,
+  type PageResult,
+  type ProductCardDTO,
+} from "./products";
 
 /**
  * In-memory search (design D3). `getSearchIndexRows()` is the ONE query this
@@ -18,13 +24,18 @@ import { PRODUCT_PAGE_SIZE, type PageResult, type ProductCardDTO, type ProductTa
  * The select shape below intentionally duplicates most of `products.ts`'s
  * `productCardSelect` (same category/media/variant fields) plus `description`
  * (which the card select omits — cards never render it, ranking needs it).
- * `products.ts`'s own mapping helpers (`toProductCard`, `cheapestPricedVariant`,
- * `saleOf`, `mediaAlt`, `pickTag`, `distinctMaterials`) are module-private and
- * this task's file scope does not include editing `products.ts`, so the
- * mapping is re-implemented here rather than exported-and-shared — the same
- * choice `reviews.ts` already made for its own `clampPage` duplicate, and for
- * the same reason (one small pure function is not worth coupling two DAL
- * modules' file scopes across separate PRs).
+ *
+ * PR8 review-follow-up: the mapping helpers themselves (`toProductCard`,
+ * `cheapestPricedVariant`, `saleOf`, `mediaAlt`, `pickTag`, `distinctMaterials`,
+ * `clampPage`) used to be re-implemented here byte-for-byte, because they were
+ * module-private in `products.ts` and this file's original task scope did not
+ * include editing that module. That duplication is exactly what this review
+ * follow-up closes: `products.ts` now exports those helpers (generalized where
+ * needed — see its `ProductCardRowLike`) and this module imports them
+ * instead of re-defining them, so the two DAL modules cannot silently drift
+ * on what counts as, say, a valid sale price. `reviews.ts`'s own separate
+ * `clampPage` duplicate was NOT touched here (out of this task's file scope)
+ * and remains a documented exception.
  */
 
 const singleCategorySelect = {
@@ -79,95 +90,6 @@ export function getSearchIndexRows(): Promise<SearchIndexRow[]> {
   });
 }
 
-type PricedRow = { priceCents: number; salePriceCents: number | null };
-
-/** Duplicated from `products.ts`'s `saleOf` — see the module docblock above. */
-function saleOf(variant: PricedRow): number | null {
-  const { salePriceCents, priceCents } = variant;
-
-  if (salePriceCents === null || salePriceCents <= 0 || salePriceCents >= priceCents) {
-    return null;
-  }
-
-  return salePriceCents;
-}
-
-function effectivePriceCents(variant: PricedRow): number {
-  return saleOf(variant) ?? variant.priceCents;
-}
-
-/** Duplicated from `products.ts`'s `cheapestPricedVariant` [INV-1]. */
-function cheapestPricedVariant<T extends PricedRow>(variants: T[]): T | null {
-  let cheapest: T | null = null;
-
-  for (const variant of variants) {
-    if (variant.priceCents <= 0) {
-      continue;
-    }
-
-    if (cheapest === null || effectivePriceCents(variant) < effectivePriceCents(cheapest)) {
-      cheapest = variant;
-    }
-  }
-
-  return cheapest;
-}
-
-function mediaAlt(alt: string | null, productName: string): string {
-  return alt !== null && alt.trim() !== "" ? alt : productName;
-}
-
-function pickTag(tags: ProductTag[] | null | undefined): ProductTag | null {
-  if (!tags) return null;
-  if (tags.includes("BEST_SELLER")) return "BEST_SELLER";
-  if (tags.includes("NEW")) return "NEW";
-  return null;
-}
-
-function distinctMaterials(variants: { material: string | null }[]): string[] {
-  const materials: string[] = [];
-
-  for (const { material } of variants) {
-    if (material !== null && material.trim() !== "" && !materials.includes(material)) {
-      materials.push(material);
-    }
-  }
-
-  return materials;
-}
-
-/** Duplicated from `products.ts`'s `toProductCard` — see the module docblock above. */
-function toSearchCard(row: SearchIndexRow): ProductCardDTO {
-  const cheapest = cheapestPricedVariant(row.variants);
-  const category = row.categories[0] ?? null;
-  const image = row.media[0] ?? null;
-
-  return {
-    slug: row.slug,
-    name: row.name,
-    categoryName: category?.name ?? null,
-    categorySlug: category?.slug ?? null,
-    image: image === null ? null : { url: image.url, alt: mediaAlt(image.alt, row.name) },
-    fromPriceCents: cheapest?.priceCents ?? null,
-    fromSalePriceCents: cheapest === null ? null : saleOf(cheapest),
-    hasConsultPrice: row.variants.some((variant) => variant.priceCents === 0),
-    inStock: row.variants.some((variant) => variant.inStock),
-    materials: distinctMaterials(row.variants),
-    tag: pickTag(row.tags),
-  };
-}
-
-/** Same clamp contract as `products.ts`'s private `clampPage` (design D12). */
-function clampPage(page: number | undefined, totalPages: number): number {
-  const lastPage = Math.max(totalPages, 1);
-
-  if (typeof page !== "number" || !Number.isFinite(page)) {
-    return 1;
-  }
-
-  return Math.min(Math.max(Math.floor(page), 1), lastPage);
-}
-
 function paginateRanked(
   rows: SearchIndexRow[],
   page: number | undefined,
@@ -181,7 +103,9 @@ function paginateRanked(
     // Map to the DTO only for the current page's slice — ranking already
     // produced the caller's own row objects (`rank.test.ts`: "hands back the
     // caller's own row objects"), so there is nothing to re-query by slug.
-    items: rows.slice(start, start + PRODUCT_PAGE_SIZE).map(toSearchCard),
+    // `toProductCard` (imported from `products.ts`) is the SAME function the
+    // category grid uses (PR8 review-follow-up) — no second implementation.
+    items: rows.slice(start, start + PRODUCT_PAGE_SIZE).map(toProductCard),
     page: clampedPage,
     pageSize: PRODUCT_PAGE_SIZE,
     total,

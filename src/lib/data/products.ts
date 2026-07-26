@@ -136,15 +136,22 @@ const productDetailSelect = {
 
 type ProductCardRow = Prisma.ProductGetPayload<{ select: typeof productCardSelect }>;
 type ProductDetailRow = Prisma.ProductGetPayload<{ select: typeof productDetailSelect }>;
-type PricedRow = { priceCents: number; salePriceCents: number | null };
+export type PricedRow = { priceCents: number; salePriceCents: number | null };
 
 /**
  * A sale price only counts when it is a real discount over the list price.
  * `0`, negatives and values at or above `priceCents` would render as
  * "was $100 / now $120" or a 0% saving, so they are reported as "not on sale"
  * rather than passed through raw.
+ *
+ * Exported (PR8 review-follow-up): `src/lib/data/search.ts` used to carry a
+ * byte-for-byte copy of this and the other card-mapping helpers below. A
+ * silent drift between the two (e.g. a change to what counts as "on sale"
+ * landing here but not there) would mean the category grid and search results
+ * disagree about the same product's price. Sharing one implementation closes
+ * that gap outright instead of merely detecting it after the fact.
  */
-function saleOf(variant: PricedRow): number | null {
+export function saleOf(variant: PricedRow): number | null {
   const { salePriceCents, priceCents } = variant;
 
   if (salePriceCents === null || salePriceCents <= 0 || salePriceCents >= priceCents) {
@@ -165,7 +172,7 @@ function effectivePriceCents(variant: PricedRow): number {
  * are read off the SAME cheapest variant: mixing a list price from one variant
  * with a sale price from another can produce a nonsensical was/now pair.
  */
-function cheapestPricedVariant<T extends PricedRow>(variants: T[]): T | null {
+export function cheapestPricedVariant<T extends PricedRow>(variants: T[]): T | null {
   let cheapest: T | null = null;
 
   for (const variant of variants) {
@@ -186,7 +193,8 @@ function cheapestPricedVariant<T extends PricedRow>(variants: T[]): T | null {
  * without alt text is not decorative, so it falls back to the product name
  * (a description of what the image actually shows, not invented copy).
  */
-function mediaAlt(alt: string | null, productName: string): string {
+/** Exported (PR8 review-follow-up) — shared with `search.ts`, see `saleOf`. */
+export function mediaAlt(alt: string | null, productName: string): string {
   return alt !== null && alt.trim() !== "" ? alt : productName;
 }
 
@@ -206,14 +214,15 @@ function mediaAlt(alt: string | null, productName: string): string {
  * is the driver's behaviour and not a contract we control. Tolerating it here
  * costs one guard and removes the question entirely.
  */
-function pickTag(tags: ProductTag[] | null | undefined): ProductTag | null {
+export function pickTag(tags: ProductTag[] | null | undefined): ProductTag | null {
   if (!tags) return null;
   if (tags.includes("BEST_SELLER")) return "BEST_SELLER";
   if (tags.includes("NEW")) return "NEW";
   return null;
 }
 
-function distinctMaterials(variants: { material: string | null }[]): string[] {
+/** Exported (PR8 review-follow-up) — shared with `search.ts`, see `saleOf`. */
+export function distinctMaterials(variants: { material: string | null }[]): string[] {
   const materials: string[] = [];
 
   for (const { material } of variants) {
@@ -225,7 +234,25 @@ function distinctMaterials(variants: { material: string | null }[]): string[] {
   return materials;
 }
 
-function toProductCard(row: ProductCardRow): ProductCardDTO {
+/**
+ * Structural shape `toProductCard` needs from a row — deliberately NOT
+ * `ProductCardRow` itself, so a row carrying extra fields (e.g. `search.ts`'s
+ * `SearchIndexRow`, which additionally selects `description` for ranking)
+ * still satisfies it and can be mapped with the exact same function. This is
+ * what actually removes the products/search duplication rather than just
+ * renaming it (PR8 review-follow-up).
+ */
+export interface ProductCardRowLike {
+  slug: string;
+  name: string;
+  tags: ProductTag[] | null | undefined;
+  categories: { name: string; slug: string }[];
+  media: { url: string; alt: string | null }[];
+  variants: (PricedRow & { material: string | null; inStock: boolean })[];
+}
+
+/** Exported (PR8 review-follow-up) — shared with `search.ts`, see `saleOf`. */
+export function toProductCard<T extends ProductCardRowLike>(row: T): ProductCardDTO {
   const cheapest = cheapestPricedVariant(row.variants);
   const category = row.categories[0] ?? null;
   const image = row.media[0] ?? null;
@@ -267,7 +294,8 @@ function toProductDetail(row: ProductDetailRow): ProductDetailDTO {
   };
 }
 
-function clampPage(page: number | undefined, totalPages: number): number {
+/** Exported (PR8 review-follow-up) — shared with `search.ts`, see `saleOf`. */
+export function clampPage(page: number | undefined, totalPages: number): number {
   const lastPage = Math.max(totalPages, 1);
 
   if (typeof page !== "number" || !Number.isFinite(page)) {
