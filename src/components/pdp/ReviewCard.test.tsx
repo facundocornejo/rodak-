@@ -50,4 +50,17 @@ describe("ReviewCard", () => {
     expect(container.textContent).not.toContain("★");
     expect(screen.getByRole("img", { name: "4 de 5 estrellas" })).toBeInTheDocument();
   });
+
+  it("[PR7 review WARNING] pins the date to America/Argentina/Buenos_Aires, so an early-UTC timestamp renders on the correct LOCAL calendar day", () => {
+    // 2026-05-10T02:00:00Z is 2026-05-09 23:00 in Buenos Aires (UTC-3, no
+    // DST). Without the explicit `timeZone` this would render on the WRONG
+    // day for at least one of CI/production depending on the host's local
+    // clock — this instant crosses midnight only in Argentina's own
+    // timezone, which is exactly the case that regresses silently.
+    const earlyUtc: ReviewDTO = { ...REVIEW, createdAtISO: "2026-05-10T02:00:00.000Z" };
+    render(<ReviewCard review={earlyUtc} />);
+
+    expect(screen.getByText("9 de mayo de 2026")).toBeInTheDocument();
+    expect(screen.queryByText("10 de mayo de 2026")).not.toBeInTheDocument();
+  });
 });

@@ -1,0 +1,54 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-width: 480px;
+}
+
+/* `--text-soft` measures 7.88:1 on `--bg` (tokens.css) — already-vetted
+ * pairing. A REAL label, not a placeholder standing in for one (design
+ * rule: "a search input needs a real accessible label"). */
+.label {
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.row {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+/* `--border-strong` measures >=3:1 on `--bg` (tokens.css) — same pairing
+ * `Pagination.module.css` uses for its interactive-control borders. Touch
+ * target ~44px via `min-height`. */
+.input {
+  flex: 1;
+  min-height: 44px;
+  padding-inline: var(--space-lg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* `--text-faint` measures 5.13:1 on `--bg` (tokens.css) — already-vetted. */
+.input::placeholder {
+  color: var(--text-faint);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding-inline: var(--space-xl);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.button:hover {
+  background: var(--surface-2);
+}

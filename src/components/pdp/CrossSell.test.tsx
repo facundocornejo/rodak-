@@ -79,4 +79,29 @@ describe("CrossSell", () => {
       screen.getByText("No encontramos más productos en esta categoría."),
     ).toBeInTheDocument();
   });
+
+  // PR7 review WARNING, fixed here: the "exactly one preload per page" rule
+  // (design D13-PDP) rests entirely on `CrossSell` rendering `ProductCard`
+  // directly instead of `ProductGrid` (whose own `index===0` logic would add
+  // a SECOND preload), and until now that reasoning lived only in a comment.
+  // Real images (not `image: null`) are required here — a null image never
+  // renders an `<Image>` at all, which would pass this assertion for the
+  // wrong reason.
+  it("[D13] renders zero preload links, proving CrossSell never doubles the PDP's one `Gallery` preload", async () => {
+    getProductCardsByCategoryMock.mockResolvedValueOnce({
+      items: [
+        { ...card("mesa-a"), image: { url: "https://cdn.example/mesa-a.jpg", alt: "Mesa A" } },
+        { ...card("mesa-b"), image: { url: "https://cdn.example/mesa-b.jpg", alt: "Mesa B" } },
+      ],
+      page: 1,
+      pageSize: 24,
+      total: 2,
+      totalPages: 1,
+    });
+
+    const jsx = await CrossSell({ categorySlug: "mesas", currentSlug: "mesa-actual" });
+    render(jsx);
+
+    expect(document.head.querySelectorAll('link[rel="preload"][as="image"]')).toHaveLength(0);
+  });
 });

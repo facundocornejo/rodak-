@@ -51,6 +51,29 @@
   transform: scaleX(1);
 }
 
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+}
+
+/* `--text` on `--bg` measures 16.12:1 (tokens.css) — same pairing as the
+ * wordmark. Touch target ~44px via padding, so this survives on mobile even
+ * though `.tagline` hides there (below). */
+.searchLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+  padding-inline: var(--space-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.searchLink:hover {
+  color: var(--accent-2);
+}
+
 .tagline {
   font-size: var(--step--1);
   color: var(--text-soft);
@@ -59,7 +82,7 @@
 }
 
 /* The tagline is context, not navigation: it yields the row to the wordmark
- * before the header ever gets cramped. */
+ * and the search link before the header ever gets cramped. */
 @media (max-width: 700px) {
   .tagline {
     display: none;
