@@ -68,7 +68,7 @@ describe("SearchResults — zero matches", () => {
     render(ui);
 
     expect(
-      screen.getByText('No encontramos resultados para "zzznomatch". Probá con otra palabra.'),
+      screen.getByText("No encontramos resultados para “zzznomatch”. Probá con otra palabra."),
     ).toBeInTheDocument();
   });
 });

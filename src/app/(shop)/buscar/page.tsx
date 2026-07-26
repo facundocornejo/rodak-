@@ -108,7 +108,7 @@ export async function SearchResults({
   if (result.result.items.length === 0) {
     return (
       <EmptyState
-        message={`No encontramos resultados para "${query.trim()}". Probá con otra palabra.`}
+        message={`No encontramos resultados para “${query.trim()}”. Probá con otra palabra.`}
       />
     );
   }

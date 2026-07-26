@@ -22,9 +22,13 @@ export interface TabsProps {
 }
 
 /**
- * Four fixed PDP tabs (Descripción/Specs/Envío y armado/Reseñas — task 6.7),
- * always rendered regardless of product data (a tab set that changes shape
- * per product would hide the SKU on some products and not others).
+ * Four fixed PDP tabs (Descripción/Specs/Envío/Reseñas — task 6.7), always
+ * rendered regardless of product data (a tab set that changes shape per
+ * product would hide the SKU on some products and not others).
+ *
+ * PR8 review-follow-up fix: this docblock used to say "Envío y armado",
+ * stale since PR7 renamed the rendered tab label to "Envío"
+ * (`producto/[slug]/page.tsx`).
  *
  * Real `role="tablist"` implementation, not a half-implemented one (design
  * rule: "half-correct ARIA is worse than none"): `role="tab"`/`aria-selected`/
