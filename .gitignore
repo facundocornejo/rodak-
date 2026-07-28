@@ -39,3 +39,5 @@ Thumbs.db
 # Anchored to the repo root on purpose: an unanchored `data/` also matched
 # `src/lib/data/`, silently ignoring every new DAL file.
 /data/
+# Local AI runtime state
+.atl/
